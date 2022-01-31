@@ -13,17 +13,41 @@ namespace CommandParcer
         public string ChatId { get; private set; }
         public string MessageId { get; private set; }
         public string Name { get; private set; }
+        public bool IsUpdate { get; private set; }
 
-        public Parcer(string chatId, string messageId, string name)
+        public Parcer(string chatId, string messageId, string name, bool isUpdate)
         {
             ChatId = chatId;
             MessageId = messageId;
             Name = name;
+            IsUpdate = isUpdate;
         }
 
         public string ParceCommand(string command)
         {
             List<string> args = command.Split(' ').ToList();
+
+            if (IsUpdate)
+            {
+                command = args[0];
+                args.RemoveAt(0);
+
+                command = command.ToLower();
+
+                if (command == "/add")
+                {
+                    args.Add(MessageId);
+                    args.Add(ChatId);
+
+                    args = CreateArgs(command, args);
+
+                    command = "/addupdate";
+
+                    MethodProvider methodProviderUpdate = new MethodProvider(new DBProvider());
+
+                    return methodProviderUpdate.Invoke(command, args.ToArray());
+                }
+            }
 
             command = args[0];
             args.RemoveAt(0);

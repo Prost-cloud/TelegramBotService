@@ -16,6 +16,7 @@ namespace CommandParcer
             _dictionaryMethod = new Dictionary<string, Delegate>();
 
             _dictionaryMethod.Add("/add",                    new Func<string, string, string, string, string> (_dBProvider.AddProduct));
+            _dictionaryMethod.Add("/addupdate",              new Func<string, string, string, string, string>(_dBProvider.AddUpdate));
             _dictionaryMethod.Add("/delete",                 new Func<string, string, string, string>         (_dBProvider.DeleteProduct));
             _dictionaryMethod.Add("/addpayer",               new Func<string, string, string, string>         (_dBProvider.AddPayer));
             _dictionaryMethod.Add("/deletepayer",            new Func<string, string, string, string>         (_dBProvider.DeletePayer));

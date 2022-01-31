@@ -10,6 +10,7 @@ namespace Interfaces
     public interface IDbProvider
     {
         public string AddProduct(string name, string cost, string messageId, string chatId);
+        public string AddUpdate(string name, string cost, string messageId, string chatId);
         public string UpdateProduct(string name, string cost, string messageId, string chatId);
         public string DeleteProduct(string id, string messageId, string chatId);
         public string AddPayer(string name, string messageId, string userId);

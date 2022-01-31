@@ -84,11 +84,11 @@ namespace TelegramBotService
                 HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name);
 
                 handleMessage.Invoke();
-
+#if DEBUG
                 Console.WriteLine("get message:");
                 Console.WriteLine($"ID: {update.Message.MessageId} Text:{update.Message.Text}");
                 Console.WriteLine($"chat ID:{chatId} Name:{name}");
-
+#endif
                 Message sentMessage = await botClient.SendTextMessageAsync(
                     chatId: chatId,
                     text: handleMessage.Result,
@@ -98,13 +98,18 @@ namespace TelegramBotService
             {
                 var chatId = update.EditedMessage.Chat.Id;
                 var messageText = update.EditedMessage.Text;
-                var messageID = update.EditedMessage.MessageId;
+                var messageId = update.EditedMessage.MessageId;
+                var name = update.EditedMessage.Chat.Username;
+               
+                HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name, true);
 
-                Console.WriteLine($"Edidet a '{messageText}' message in chat {chatId}. Message id:{messageID}");
-
+                handleMessage.Invoke();
+#if DEBUG
+                Console.WriteLine($"Edidet a '{messageText}' message in chat {chatId}. Message id:{messageId}");
+#endif
                 Message sentMessage = await botClient.SendTextMessageAsync(
                     chatId: chatId,
-                    text: $"You changed:\n{messageText}\nMessage id:{messageID}",
+                    text: handleMessage.Result,
                     cancellationToken: cancellationToken);
             }
         }

@@ -112,11 +112,13 @@ namespace DBContext
 
         public string AddProduct(string name, string costAsString, string messageIdAsString, string chatIdAsString)
         {
+            costAsString = costAsString.Replace(".", ",");
+
             long chatId;
-            int cost;
+            decimal cost;
             int messageId;
             if (!(int.TryParse(messageIdAsString, out messageId)
-                && int.TryParse(costAsString, out cost)
+                && decimal.TryParse(costAsString, out cost)
                 && long.TryParse(chatIdAsString, out chatId)))
             {
                 return "Use \"/add (name of product) (cost of product)\"";
@@ -623,5 +625,34 @@ namespace DBContext
             return _sqlLiteDBContext.ShoppingList.Where(x => x.ID == idShoppingList && !x.isDeleted).FirstOrDefault();
         }
 
+        public string AddUpdate(string name, string costAsString, string messageIdAsString, string chatIdAsString)
+        {
+            costAsString = costAsString.Replace(".", ",");
+
+            long chatId;
+            decimal cost;
+            int messageId;
+            if (!(int.TryParse(messageIdAsString, out messageId)
+                && decimal.TryParse(costAsString, out cost)
+                && long.TryParse(chatIdAsString, out chatId)))
+            {
+                return "Use \"/add (name of product) (cost of product)\"";
+            }
+
+            var currentProduct = _sqlLiteDBContext.Products.Where(x => x.MessageID == messageId).AsQueryable().ForEachAsync(
+                x => { x.Name = name; x.Price = cost; });
+
+            try
+            {
+                SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                return "Something wen't wrong! Try another time later";
+            }
+
+            return $"Success updated {name} with {cost}";
+
+        }
     }
 }
