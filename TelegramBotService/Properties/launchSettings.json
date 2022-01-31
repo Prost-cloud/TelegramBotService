@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "TelegramBotService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
