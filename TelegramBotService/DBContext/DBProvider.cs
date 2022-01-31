@@ -617,38 +617,7 @@ namespace DBContext
 
         }       
 
-        public string UpdateProduct(string name, string costAsString, string messageIdAsString, string chatIdAsString)
-        {
-            throw new NotImplementedException();
-        }
-        private void SaveChanges()
-        {
-            _sqlLiteDBContext.SaveChangesAsync();
-        }
-
-        private ShoppingList GetCurrentShoppingList(Users currentUser)
-        {
-            if (_sqlLiteDBContext.ShoppingList.ToList().Where(x => x.Owner == currentUser && x.Current).Count() != 0)
-            {
-                return _sqlLiteDBContext.ShoppingList.ToList().Where(x => x.Owner == currentUser && x.Current).First();
-            }
-
-            return null;
-        }
-
-        private Users GetUserByChatID(long chatId)
-        {
-            return  _sqlLiteDBContext.Users.ToList().Where(x => x.ChatID == chatId).FirstOrDefault();
-        }
-        private Product GetProductByID(int productId)
-        {
-            return _sqlLiteDBContext.Products.ToList().Where(x => x.ID == productId).FirstOrDefault();
-        }
-
-        private ShoppingList GetShoppingListById(int idShoppingList)
-        {
-            return _sqlLiteDBContext.ShoppingList.Where(x => x.ID == idShoppingList && !x.IsDeleted).FirstOrDefault();
-        }
+       
 
         public string AddUpdate(string name, string costAsString, string messageIdAsString, string chatIdAsString)
         {
@@ -679,5 +648,39 @@ namespace DBContext
             return $"Success updated {name} with {cost}";
 
         }
+
+        public string UpdateProduct(string name, string costAsString, string messageIdAsString, string chatIdAsString)
+        {
+            throw new NotImplementedException();
+        }
+        private void SaveChanges()
+        {
+            _sqlLiteDBContext.SaveChangesAsync();
+        }
+
+        private ShoppingList GetCurrentShoppingList(Users currentUser)
+        {
+            if (_sqlLiteDBContext.ShoppingList.ToList().Where(x => x.Owner == currentUser && x.Current).Count() != 0)
+            {
+                return _sqlLiteDBContext.ShoppingList.ToList().Where(x => x.Owner == currentUser && x.Current).First();
+            }
+
+            return null;
+        }
+
+        private Users GetUserByChatID(long chatId)
+        {
+            return _sqlLiteDBContext.Users.ToList().Where(x => x.ChatID == chatId).FirstOrDefault();
+        }
+        private Product GetProductByID(int productId)
+        {
+            return _sqlLiteDBContext.Products.ToList().Where(x => x.ID == productId).FirstOrDefault();
+        }
+
+        private ShoppingList GetShoppingListById(int idShoppingList)
+        {
+            return _sqlLiteDBContext.ShoppingList.Where(x => x.ID == idShoppingList && !x.IsDeleted).FirstOrDefault();
+        }
+
     }
 }
