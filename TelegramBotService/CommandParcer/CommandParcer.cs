@@ -68,7 +68,6 @@ namespace CommandParcer
             {
                 return "I don't know that command yet :(";
             }
-
             return comandCountOfArgs[command];
         }
 
@@ -127,7 +126,6 @@ namespace CommandParcer
             {
                 newArgs.Add(args[i]);
             }
-
             return newArgs;
         }
     }
