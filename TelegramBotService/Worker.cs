@@ -23,6 +23,8 @@ namespace TelegramBotService
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
 
+
+
             string _token = "5067208302:AAFQQhmp40pgz13G_4SRQ8sH1hMPvFPi140";
 
             TelegramBotClient botClient = new TelegramBotClient(_token);
