@@ -24,19 +24,16 @@ namespace DBContext
         {
             countAsString = countAsString.Replace(".", ",");
 
-            long chatId;
-            decimal count;
-            int payerId;
-            if (!(int.TryParse(payerIdAsString, out payerId)
-                && decimal.TryParse(countAsString, out count)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(payerIdAsString, out int payerId)
+                && decimal.TryParse(countAsString, out decimal count)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/addfunds (payer id) (count)\"";
             }
 
-            
 
-            
+
+
             var payers = _sqlLiteDBContext.Payers;
 
             Users currentUser = GetUserByChatID(chatId);
@@ -76,8 +73,7 @@ namespace DBContext
         public string AddPayer(string name, string messageIdAsString, string chatIdAsString)
         {
 
-            long chatId;
-            if (!long.TryParse(chatIdAsString, out chatId))
+            if (!long.TryParse(chatIdAsString, out long chatId))
             {
                 return "Use \"/addpayer (payer name)\"";
             }
@@ -121,12 +117,9 @@ namespace DBContext
         {
             costAsString = costAsString.Replace(".", ",");
 
-            long chatId;
-            decimal cost;
-            int messageId;
-            if (!(int.TryParse(messageIdAsString, out messageId)
-                && decimal.TryParse(costAsString, out cost)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(messageIdAsString, out int messageId)
+                && decimal.TryParse(costAsString, out decimal cost)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/add (name of product) (cost of product)\"";
             }
@@ -172,8 +165,7 @@ namespace DBContext
         public string AddShoppingList(string name, string messageIdAsString, string chatIdAsString)
         {
 
-            long chatId;
-            if(!long.TryParse(chatIdAsString, out chatId))
+            if (!long.TryParse(chatIdAsString, out long chatId))
             {
                 return "Use \"/add (name of shopping list)\"";
             }
@@ -231,8 +223,7 @@ namespace DBContext
 
         public string AddUser(string chatIdAsString, string name)
         {
-            long chatId;
-            if (!long.TryParse(chatIdAsString, out chatId))
+            if (!long.TryParse(chatIdAsString, out long chatId))
             {
                 return "SomeThink went wrong";
             }
@@ -270,10 +261,8 @@ namespace DBContext
         public string DeletePayer(string idPayerAsString, string messageIdAsString, string chatIdAsString)
         {
 
-            int payerId;
-            long chatId;
-            if (!(int.TryParse(idPayerAsString, out payerId)               
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(idPayerAsString, out int payerId)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/deletepayer (payer id)\"";
             }
@@ -321,11 +310,9 @@ namespace DBContext
 
         public string DeleteProduct(string idProductAsString, string messageIdAsString, string chatIdAsString)
         {
-            int productId;
-            long chatId;
-           
-            if (!(int.TryParse(idProductAsString, out productId)
-                && long.TryParse(chatIdAsString, out chatId)))
+
+            if (!(int.TryParse(idProductAsString, out int productId)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/delete (product id)\"";
             }
@@ -366,11 +353,9 @@ namespace DBContext
 
         public string DeleteShoppingList(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
         {
-            int shoppingListId;
-            long chatId;
 
-            if (!(int.TryParse(idShoppingListAsString, out shoppingListId)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(idShoppingListAsString, out int shoppingListId)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/deleteshoppinglist (shopping list id)\"";
             }
@@ -403,9 +388,8 @@ namespace DBContext
 
         public string GetCountingByPayers(string chatIdAsString, string notUsed)
         {
-            long chatId;
 
-            if (!long.TryParse(chatIdAsString, out chatId))
+            if (!long.TryParse(chatIdAsString, out long chatId))
             {
                 return "Somethimg went wrong";
             }
@@ -457,9 +441,8 @@ namespace DBContext
 
         public string GetShoppingLists(string chatIdAsString, string notUsed)
         {
-            long chatId;
 
-            if (!long.TryParse(chatIdAsString, out chatId))
+            if (!long.TryParse(chatIdAsString, out long chatId))
             {
                 return "Somethimg went wrong";
             }
@@ -490,16 +473,13 @@ namespace DBContext
         {
             countAsString = countAsString.Replace(".", ",");
 
-            long chatId;
-            decimal count;
-            int payerId;
-            if (!(int.TryParse(payerIdAsString, out payerId)
-                && decimal.TryParse(countAsString, out count)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(payerIdAsString, out int payerId)
+                && decimal.TryParse(countAsString, out decimal count)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/removefunds (payer id) (count)\"";
             }
-              
+
             var payers = _sqlLiteDBContext.Payers;
 
             Users currentUser = GetUserByChatID(chatId);
@@ -538,11 +518,9 @@ namespace DBContext
 
         public string SelectShoppingList(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
         {
-            long chatId;
-            int idShoppingList;
-            
-            if (! (int.TryParse(idShoppingListAsString, out idShoppingList)
-                && long.TryParse(chatIdAsString, out chatId)))
+
+            if (!(int.TryParse(idShoppingListAsString, out int idShoppingList)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/select (shopping list id)\"";
             }
@@ -570,11 +548,9 @@ namespace DBContext
 
         public string Show(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
         {
-            long chatId;
-            int idShoppingList;
 
-            if (!(int.TryParse(idShoppingListAsString, out idShoppingList)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(idShoppingListAsString, out int idShoppingList)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/select (shopping list id)\"";
             }
@@ -623,12 +599,9 @@ namespace DBContext
         {
             costAsString = costAsString.Replace(".", ",");
 
-            long chatId;
-            decimal cost;
-            int messageId;
-            if (!(int.TryParse(messageIdAsString, out messageId)
-                && decimal.TryParse(costAsString, out cost)
-                && long.TryParse(chatIdAsString, out chatId)))
+            if (!(int.TryParse(messageIdAsString, out int messageId)
+                && decimal.TryParse(costAsString, out decimal cost)
+                && long.TryParse(chatIdAsString, out long chatId)))
             {
                 return "Use \"/add (name of product) (cost of product)\"";
             }
