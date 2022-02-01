@@ -41,6 +41,7 @@ namespace DBContext
 
             Users currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+            Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
             
             if (currentShoppingList is null)
             {
@@ -52,12 +53,18 @@ namespace DBContext
                 return "Can't find user write \"/start\"";
             }
 
-            payers.Where(x => x.ID == payerId && x.ShoppingList == currentShoppingList).AsQueryable().ForEachAsync(x => x.Payed += count);
+            if(payer.ShoppingList != currentShoppingList && !payer.IsDeleted)
+            {
+                return "That payer is not in current shopping list or deleted";
+            }
+
+
+            payers.Where(x => x == payer).AsQueryable().ForEachAsync(x => x.Payed += count);
             try
             {
                 SaveChanges();
             }
-            catch (DbUpdateException )
+            catch (DbUpdateException)
             {
                 return "Something wen't wrong! Try another time later";
             }
@@ -282,7 +289,7 @@ namespace DBContext
                 return "Can't find user write \"/start\"";
             }
 
-            var currentPayer = payers.Where(x => x.ID == payerId).FirstOrDefault();
+            var currentPayer = payers.Find(payerId);
 
             if(currentPayer is null)
             {
@@ -378,7 +385,7 @@ namespace DBContext
                 return $"Can't find shopping list with id {shoppingListId} or it's not yours.";
             }
 
-            _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == currentUser).AsQueryable().ForEachAsync(x => x.isDeleted = false);
+            _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == currentUser).AsQueryable().ForEachAsync(x => x.IsDeleted = false);
 
             try
             {
@@ -406,9 +413,11 @@ namespace DBContext
             var currentUser = GetUserByChatID(chatId);
             var currentShoppingList = GetCurrentShoppingList(currentUser);
 
-            var payers = _sqlLiteDBContext.Payers.Where(x => x.ShoppingList == currentShoppingList).ToList();
+            var payers = _sqlLiteDBContext.Payers.Where(x => x.ShoppingList == currentShoppingList && !x.IsDeleted).ToList();
 
             Dictionary<Payers, decimal> payed = new Dictionary<Payers, decimal>();
+
+            decimal sumPayed = 0;
             
             if(payers.Count() == 0)
             {
@@ -418,9 +427,11 @@ namespace DBContext
             foreach(var payer in payers)
             {
                 payed.Add(payer, payer.Payed);
+                sumPayed += payer.Payed;
             }
 
-            var sumOfProduct = _sqlLiteDBContext.Products.Where(x => x.ShoppingList == currentShoppingList).ToList().Sum(x=>x.Price);
+            var sumOfProduct = _sqlLiteDBContext.Products.Where(x => x.ShoppingList == currentShoppingList && !x.IsDeleted).ToList().Sum(x=>x.Price);
+            
 
             var separetedSum = sumOfProduct / payers.Count();
 
@@ -438,6 +449,8 @@ namespace DBContext
                 result.Append($"{payer.Key.Name} {payer.Value}\n");
             }
 
+            result.Append($"sum of products {sumOfProduct} - payed {sumPayed}");
+
             return result.ToString();
 
         }
@@ -453,7 +466,7 @@ namespace DBContext
 
             var currentUsre = GetUserByChatID(chatId);
 
-            var allShoppingLists = _sqlLiteDBContext.ShoppingList.Where(x => x.Owner == currentUsre && !x.isDeleted).ToList();
+            var allShoppingLists = _sqlLiteDBContext.ShoppingList.Where(x => x.Owner == currentUsre && !x.IsDeleted).ToList();
 
             if (allShoppingLists.Count == 0)
             {
@@ -491,6 +504,7 @@ namespace DBContext
 
             Users currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+            Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
 
             if (currentShoppingList is null)
             {
@@ -502,7 +516,13 @@ namespace DBContext
                 return "Can't find user write \"/start\"";
             }
 
-            payers.Where(x => x.ID == payerId && x.ShoppingList == currentShoppingList).AsQueryable().ForEachAsync(x => x.Payed -= count);
+            if (payer.ShoppingList == currentShoppingList && payer.IsDeleted)
+            {
+                return "That payer is not in current shopping list or deleted";
+            }
+
+
+            payers.Where(x => x == payer).AsQueryable().ForEachAsync(x => x.Payed -= count);
             try
             {
                 SaveChanges();
@@ -529,6 +549,11 @@ namespace DBContext
 
             var currentUser = GetUserByChatID(chatId);
             var currentShoppingList = GetShoppingListById(idShoppingList);
+
+            if(currentShoppingList.Owner != currentUser)
+            {
+                return "That's shopping list is not yours";
+            }
 
             try
             {
@@ -622,7 +647,7 @@ namespace DBContext
 
         private ShoppingList GetShoppingListById(int idShoppingList)
         {
-            return _sqlLiteDBContext.ShoppingList.Where(x => x.ID == idShoppingList && !x.isDeleted).FirstOrDefault();
+            return _sqlLiteDBContext.ShoppingList.Where(x => x.ID == idShoppingList && !x.IsDeleted).FirstOrDefault();
         }
 
         public string AddUpdate(string name, string costAsString, string messageIdAsString, string chatIdAsString)

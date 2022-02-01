@@ -10,5 +10,10 @@ namespace Models
         public int MessageID { get; set; }
         public ShoppingList ShoppingList { get; set; }
         public bool IsDeleted { get; set; }
+
+        public override string ToString()
+        {
+            return ID.ToString() + " " + Name;
+        }
     }
 }

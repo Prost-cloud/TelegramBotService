@@ -22,15 +22,21 @@ namespace TelegramBotService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            string[] file;
 
-
-
-            string _token = "5067208302:AAFQQhmp40pgz13G_4SRQ8sH1hMPvFPi140";
+            if (System.IO.File.Exists("TelegramApi.txt"))
+            {
+                file = System.IO.File.ReadAllLines("TelegramApi.txt");
+            }
+            else
+            {
+                throw new System.IO.FileNotFoundException("Create TelegramApi.txt with token in program root");
+            }
+            string _token = file[0];
 
             TelegramBotClient botClient = new TelegramBotClient(_token);
 
             using var cts = new CancellationTokenSource();
-
 
 
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
@@ -87,9 +93,9 @@ namespace TelegramBotService
 
                 handleMessage.Invoke();
 #if DEBUG
-                Console.WriteLine("get message:");
+                Console.WriteLine("\nget message:");
                 Console.WriteLine($"ID: {update.Message.MessageId} Text:{update.Message.Text}");
-                Console.WriteLine($"chat ID:{chatId} Name:{name}");
+                Console.WriteLine($"chat ID:{chatId} Name:{name}\n");
 #endif
                 Message sentMessage = await botClient.SendTextMessageAsync(
                     chatId: chatId,
@@ -107,7 +113,7 @@ namespace TelegramBotService
 
                 handleMessage.Invoke();
 #if DEBUG
-                Console.WriteLine($"Edidet a '{messageText}' message in chat {chatId}. Message id:{messageId}");
+                Console.WriteLine($"\nEdidet a '{messageText}' message in chat {chatId}. Message id:{messageId}\n");
 #endif
                 Message sentMessage = await botClient.SendTextMessageAsync(
                     chatId: chatId,
