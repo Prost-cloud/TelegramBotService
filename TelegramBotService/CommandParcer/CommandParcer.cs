@@ -10,17 +10,16 @@ namespace CommandParcer
 {
     public class Parcer
     {
-        public string ChatId { get; private set; }
-        public string MessageId { get; private set; }
         public string Name { get; private set; }
         public bool IsUpdate { get; private set; }
 
-        public Parcer(string chatId, string messageId, string name, bool isUpdate)
-        {
-            ChatId = chatId;
-            MessageId = messageId;
+        private MethodProvider _methodProvider;
+
+        public Parcer(long chatId, int messageId, string name, bool isUpdate)
+        {            
             Name = name;
             IsUpdate = isUpdate;
+            this._methodProvider = new MethodProvider(new DBProvider(chatId, messageId, name, chatId));
         }
 
         public string ParceCommand(string command)
@@ -36,41 +35,25 @@ namespace CommandParcer
 
                 if (command == "/add")
                 {
-                    args.Add(MessageId);
-                    args.Add(ChatId);
-
                     args = CreateArgs(command, args);
 
                     command = "/addupdate";
 
-                    MethodProvider methodProviderUpdate = new MethodProvider(new DBProvider(ChatId, MessageId));
-
-                    return methodProviderUpdate.Invoke(command, args.ToArray());
+                    return _methodProvider.Invoke(command, args.ToArray());
                 }
             }
 
             command = args[0];
             args.RemoveAt(0);
 
-            command = command.ToLower();
-
-            args.Add(MessageId);
-            args.Add(ChatId);
+            command = command.ToLower();           
 
             args = CreateArgs(command, args);
 
             if (args is null)  
-                return DefaultOfCommand(command);
-
-            if(args.Count == 0)
-            {
-                args.Add(ChatId);                
-                args.Add(Name);
-            }
-
-            MethodProvider methodProvider = new MethodProvider(new DBProvider());
-
-            return methodProvider.Invoke(command, args.ToArray());
+                return DefaultOfCommand(command);               
+                       
+            return _methodProvider.Invoke(command, args.ToArray());
         }
 
         private string DefaultOfCommand(string command)
@@ -99,17 +82,17 @@ namespace CommandParcer
         {
             Dictionary<string, int> comandCountOfArgs = new Dictionary<string, int>();
 
-            comandCountOfArgs.Add("/add", 4);
-            comandCountOfArgs.Add("/delete", 3);
-            comandCountOfArgs.Add("/addpayer", 3);
-            comandCountOfArgs.Add("/deletepayer", 3);
-            comandCountOfArgs.Add("/addfunds", 4);
-            comandCountOfArgs.Add("/removefunds", 4);
-            comandCountOfArgs.Add("/create", 3);
-            comandCountOfArgs.Add("/deleteshoppinglist", 3);
-            comandCountOfArgs.Add("/select", 3);
+            comandCountOfArgs.Add("/add", 2);
+            comandCountOfArgs.Add("/delete", 1);
+            comandCountOfArgs.Add("/addpayer", 1);
+            comandCountOfArgs.Add("/deletepayer", 1);
+            comandCountOfArgs.Add("/addfunds", 2);
+            comandCountOfArgs.Add("/removefunds", 2);
+            comandCountOfArgs.Add("/create", 1);
+            comandCountOfArgs.Add("/deleteshoppinglist", 1);
+            comandCountOfArgs.Add("/select", 1);
             comandCountOfArgs.Add("/start", 0);
-            comandCountOfArgs.Add("/show", 3);
+            comandCountOfArgs.Add("/show", 1);
             comandCountOfArgs.Add("/info", 0);
             comandCountOfArgs.Add("/count", 0);
 
