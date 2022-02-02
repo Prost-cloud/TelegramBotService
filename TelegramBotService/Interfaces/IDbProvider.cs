@@ -23,7 +23,6 @@ namespace Interfaces
 
         public string Show(string shoppingListId, string messageId, string chatId);
 
-
         public string AddUser(string chatId, string name);
 
         public string GetCountingByPayers(string chatIdAsString, string notUsed);
