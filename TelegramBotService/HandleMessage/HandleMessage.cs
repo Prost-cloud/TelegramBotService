@@ -27,7 +27,7 @@ namespace HandleMessage
 
         public void Invoke()
         {
-            Parcer parcer = new Parcer(ChatId.ToString(), MessageId.ToString(), Name, IsUpdate);
+            Parcer parcer = new Parcer(ChatId, MessageId, Name, IsUpdate);
             Result = parcer.ParceCommand(Message);
 
         }

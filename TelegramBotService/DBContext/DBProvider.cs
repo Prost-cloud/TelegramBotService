@@ -14,26 +14,28 @@ namespace DBContext
 
         SqlLiteDBContext _sqlLiteDBContext = new SqlLiteDBContext();
         User CurrentUser { get; set; }
-        int CurrentMessageId { get; set; }
+        int _currentMessageId { get; set; }
+            
 
-
-
-        public DBProvider(string chatIdAsString, string messageIdAsString)
+        public DBProvider(long chatIdAsString, int messageIdAsString, string name, long chatId)
         {
             _sqlLiteDBContext = new SqlLiteDBContext();
             _sqlLiteDBContext.Database.EnsureCreatedAsync();
+            _currentMessageId = messageIdAsString;
+            CurrentUser = GetUserByChatID(chatIdAsString);
 
-            CurrentUser = GetUserByChatID(int.Parse(chatIdAsString));
-            CurrentMessageId = int.Parse(messageIdAsString);
+            if (CurrentUser == default(User))
+            {
+                AddUser(name, chatId);
+            }           
         }
 
-        public string AddFunds(string payerIdAsString, string countAsString, string messageIdAsString, string chatIdAsString)
+        public string AddFunds(string payerIdAsString, string countAsString)
         {
             countAsString = countAsString.Replace(".", ",");
 
             if (!(int.TryParse(payerIdAsString, out int payerId)
-                && decimal.TryParse(countAsString, out decimal count)
-                && long.TryParse(chatIdAsString, out long chatId)))
+                && decimal.TryParse(countAsString, out decimal count)))
             {
                 return "Use \"/addfunds (payer id) (count)\"";
             }
@@ -42,9 +44,8 @@ namespace DBContext
 
 
             var payers = _sqlLiteDBContext.Payers;
-
-            User currentUser = GetUserByChatID(chatId);
-            ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+                        
+            ShoppingList currentShoppingList = GetCurrentShoppingList(CurrentUser);
             Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
             
             if (currentShoppingList is null)
@@ -52,7 +53,7 @@ namespace DBContext
                 return "Can't find current shopping list";
             }
 
-            if (currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -77,25 +78,19 @@ namespace DBContext
 
         }
 
-        public string AddPayer(string name, string messageIdAsString, string chatIdAsString)
+        public string AddPayer(string name)
         {
-
-            if (!long.TryParse(chatIdAsString, out long chatId))
-            {
-                return "Use \"/addpayer (payer name)\"";
-            }
-
+                
             var payers = _sqlLiteDBContext.Payers;
-            
-            User currentUser = GetUserByChatID(chatId);
-            ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+                       
+            ShoppingList currentShoppingList = GetCurrentShoppingList(CurrentUser);
 
             if (currentShoppingList is null)
             {
                 return "Can't find current shopping list";
             }
 
-            if (currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -120,13 +115,11 @@ namespace DBContext
 
         }
 
-        public string AddProduct(string name, string costAsString, string messageIdAsString, string chatIdAsString)
+        public string AddProduct(string name, string costAsString)
         {
             costAsString = costAsString.Replace(".", ",");
 
-            if (!(int.TryParse(messageIdAsString, out int messageId)
-                && decimal.TryParse(costAsString, out decimal cost)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!decimal.TryParse(costAsString, out decimal cost))
             {
                 return "Use \"/add (name of product) (cost of product)\"";
             }
@@ -134,15 +127,14 @@ namespace DBContext
 
             var product = _sqlLiteDBContext.Products;
 
-            User currentUser = GetUserByChatID(chatId);
-            ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+            ShoppingList currentShoppingList = GetCurrentShoppingList(CurrentUser);
 
             if (currentShoppingList is null)
             {
                 return "Can't find current shopping list";
             }
 
-            if (currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -151,7 +143,7 @@ namespace DBContext
             {
                 Name = name,
                 Price = cost,
-                MessageID = messageId,
+                MessageID = _currentMessageId,
                 ShoppingList = currentShoppingList,
                 IsDeleted = false
             });
@@ -169,19 +161,12 @@ namespace DBContext
 
         }
 
-        public string AddShoppingList(string name, string messageIdAsString, string chatIdAsString)
+        public string AddShoppingList(string name)
         {
 
-            if (!long.TryParse(chatIdAsString, out long chatId))
-            {
-                return "Use \"/add (name of shopping list)\"";
-            }
-
             //var shoppingList = _sqlLiteDBContext.ShoppingList.ToList();
-
-            User currentUser = GetUserByChatID(chatId);
-                     
-            if (currentUser is null)
+                                
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -189,7 +174,7 @@ namespace DBContext
             ShoppingList currentShoppingList = new ShoppingList()
             {
                 Name = name,
-                Owner = currentUser,
+                Owner = CurrentUser,
                 Current = false
             };
 
@@ -206,7 +191,7 @@ namespace DBContext
 
             try
             {
-                MakeShoppingListAsCurrent(currentUser, currentShoppingList);
+                MakeShoppingListAsCurrent(CurrentUser, currentShoppingList);
             }
             catch (DbUpdateException )
             {
@@ -228,18 +213,16 @@ namespace DBContext
 
         }
 
-        public string AddUser(string chatIdAsString, string name)
+        public string Start()// do somethink there's some problem i can feel it
         {
-            if (!long.TryParse(chatIdAsString, out long chatId))
-            {
-                return "SomeThink went wrong";
-            }
+            return "Hello!";
+        }
 
+        private void AddUser(string name, long chatId)
+        {
             var users = _sqlLiteDBContext.Users;
 
-            User user = GetUserByChatID(chatId);
-
-            if (user is null)
+            if (CurrentUser is null)
             {
                 users.Add(new User()
                 {
@@ -251,36 +234,26 @@ namespace DBContext
                 {
                     SaveChanges();
                 }
-                catch (DbUpdateException )
+                catch (DbUpdateException)
                 {
-                    return "Something went wrong! Try another time later";
+
                 }
-
-                return "All good";
             }
-            else
-            {
-                return "I know you already";
-            }
-
         }
 
-        public string DeletePayer(string idPayerAsString, string messageIdAsString, string chatIdAsString)
+        public string DeletePayer(string idPayerAsString)
         {
 
-            if (!(int.TryParse(idPayerAsString, out int payerId)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!int.TryParse(idPayerAsString, out int payerId))
             {
                 return "Use \"/deletepayer (payer id)\"";
             }
 
 
             var payers = _sqlLiteDBContext.Payers;
-            var shoppingList = _sqlLiteDBContext.ShoppingList.ToList().Where(x=>x.Owner.ID==chatId);
-
-            User currentUser = GetUserByChatID(chatId);
-
-            if (currentUser is null)
+            var shoppingList = _sqlLiteDBContext.ShoppingList.ToList().Where(x=>x.Owner==CurrentUser);
+            
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -315,17 +288,15 @@ namespace DBContext
             return $"Success deleted {currentPayer}";
         }
 
-        public string DeleteProduct(string idProductAsString, string messageIdAsString, string chatIdAsString)
+        public string DeleteProduct(string idProductAsString)
         {
 
-            if (!(int.TryParse(idProductAsString, out int productId)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!int.TryParse(idProductAsString, out int productId))
             {
                 return "Use \"/delete (product id)\"";
             }
 
-            var currentUser = GetUserByChatID(chatId);
-            var currentShoppingList = GetCurrentShoppingList(currentUser);
+            var currentShoppingList = GetCurrentShoppingList(CurrentUser);
             var currentProduct = GetProductByID(productId); 
             
             if (currentProduct is null)
@@ -358,26 +329,23 @@ namespace DBContext
 
         
 
-        public string DeleteShoppingList(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
+        public string DeleteShoppingList(string idShoppingListAsString)
         {
 
-            if (!(int.TryParse(idShoppingListAsString, out int shoppingListId)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!int.TryParse(idShoppingListAsString, out int shoppingListId))
             {
                 return "Use \"/deleteshoppinglist (shopping list id)\"";
             }
 
-            var currentUser = GetUserByChatID(chatId);
-
             bool isShoppingListOfCurrentUser 
-                = _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == currentUser).Count() == 1;
+                = _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == CurrentUser).Count() == 1;
             
             if (!isShoppingListOfCurrentUser)
             {
                 return $"Can't find shopping list with id {shoppingListId} or it's not yours.";
             }
 
-            _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == currentUser).AsQueryable().ForEachAsync(x => x.IsDeleted = false);
+            _sqlLiteDBContext.ShoppingList.Where(x => x.ID == shoppingListId && x.Owner == CurrentUser).AsQueryable().ForEachAsync(x => x.IsDeleted = false);
 
             try
             {
@@ -393,16 +361,9 @@ namespace DBContext
 
         }
 
-        public string GetCountingByPayers(string chatIdAsString, string notUsed)
+        public string GetCountingByPayers()
         {
-
-            if (!long.TryParse(chatIdAsString, out long chatId))
-            {
-                return "Somethimg went wrong";
-            }
-
-            var currentUser = GetUserByChatID(chatId);
-            var currentShoppingList = GetCurrentShoppingList(currentUser);
+            var currentShoppingList = GetCurrentShoppingList(CurrentUser);
 
             var payers = _sqlLiteDBContext.Payers.Where(x => x.ShoppingList == currentShoppingList && !x.IsDeleted).ToList();
 
@@ -446,17 +407,9 @@ namespace DBContext
 
         }
 
-        public string GetShoppingLists(string chatIdAsString, string notUsed)
+        public string GetShoppingLists()
         {
-
-            if (!long.TryParse(chatIdAsString, out long chatId))
-            {
-                return "Somethimg went wrong";
-            }
-
-            var currentUsre = GetUserByChatID(chatId);
-
-            var allShoppingLists = _sqlLiteDBContext.ShoppingList.Where(x => x.Owner == currentUsre && !x.IsDeleted).ToList();
+            var allShoppingLists = _sqlLiteDBContext.ShoppingList.Where(x => x.Owner == CurrentUser && !x.IsDeleted).ToList();
 
             if (allShoppingLists.Count == 0)
             {
@@ -476,21 +429,19 @@ namespace DBContext
 
         }
 
-        public string RemoveFunds(string payerIdAsString, string countAsString, string messageIdAsString, string chatIdAsString)
+        public string RemoveFunds(string payerIdAsString, string countAsString)
         {
             countAsString = countAsString.Replace(".", ",");
 
             if (!(int.TryParse(payerIdAsString, out int payerId)
-                && decimal.TryParse(countAsString, out decimal count)
-                && long.TryParse(chatIdAsString, out long chatId)))
+                && decimal.TryParse(countAsString, out decimal count)))
             {
                 return "Use \"/removefunds (payer id) (count)\"";
             }
 
             var payers = _sqlLiteDBContext.Payers;
 
-            User currentUser = GetUserByChatID(chatId);
-            ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
+            ShoppingList currentShoppingList = GetCurrentShoppingList(CurrentUser);
             Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
 
             if (currentShoppingList is null)
@@ -498,7 +449,7 @@ namespace DBContext
                 return "Can't find current shopping list";
             }
 
-            if (currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -523,26 +474,24 @@ namespace DBContext
 
         }
 
-        public string SelectShoppingList(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
+        public string SelectShoppingList(string idShoppingListAsString)
         {
 
-            if (!(int.TryParse(idShoppingListAsString, out int idShoppingList)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!int.TryParse(idShoppingListAsString, out int idShoppingList))
             {
                 return "Use \"/select (shopping list id)\"";
             }
 
-            var currentUser = GetUserByChatID(chatId);
             var currentShoppingList = GetShoppingListById(idShoppingList);
 
-            if(currentShoppingList.Owner != currentUser)
+            if(currentShoppingList.Owner != CurrentUser)
             {
                 return "That's shopping list is not yours";
             }
 
             try
             {
-                MakeShoppingListAsCurrent(currentUser, currentShoppingList);
+                MakeShoppingListAsCurrent(CurrentUser, currentShoppingList);
             }
             catch (DbUpdateException)
             {
@@ -553,16 +502,14 @@ namespace DBContext
 
         }
 
-        public string Show(string idShoppingListAsString, string messageIdAsString, string chatIdAsString)
+        public string Show(string idShoppingListAsString)
         {
 
-            if (!(int.TryParse(idShoppingListAsString, out int idShoppingList)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (!int.TryParse(idShoppingListAsString, out int idShoppingList))
             {
                 return "Use \"/select (shopping list id)\"";
             }
 
-            var currentUser = GetUserByChatID(chatId);
             var curentShoppingList = GetShoppingListById(idShoppingList);
 
             if(curentShoppingList is null)
@@ -570,7 +517,7 @@ namespace DBContext
                 return $"can't find shopping list with id {idShoppingList}";
             }
 
-            if(curentShoppingList.Owner != currentUser)
+            if(curentShoppingList.Owner != CurrentUser)
             {
                 return "That shopping list is not yours";
             }
@@ -602,18 +549,17 @@ namespace DBContext
 
        
 
-        public string AddUpdate(string name, string costAsString, string messageIdAsString, string chatIdAsString)
+        public string UpdateProduct(string name, string costAsString)
         {
             costAsString = costAsString.Replace(".", ",");
 
-            if (!(int.TryParse(messageIdAsString, out int messageId)
-                && decimal.TryParse(costAsString, out decimal cost)
-                && long.TryParse(chatIdAsString, out long chatId)))
+            if (! decimal.TryParse(costAsString, out decimal cost))
+               
             {
                 return "Use \"/add (name of product) (cost of product)\"";
             }
 
-            var currentProduct = _sqlLiteDBContext.Products.Where(x => x.MessageID == messageId).AsQueryable().ForEachAsync(
+            var currentProduct = _sqlLiteDBContext.Products.Where(x => x.MessageID == _currentMessageId).AsQueryable().ForEachAsync(
                 x => { x.Name = name; x.Price = cost; });
 
             try
@@ -629,10 +575,6 @@ namespace DBContext
 
         }
 
-        public string UpdateProduct(string name, string costAsString, string messageIdAsString, string chatIdAsString)
-        {
-            throw new NotImplementedException();
-        }
         private void SaveChanges()
         {
             _sqlLiteDBContext.SaveChangesAsync();
