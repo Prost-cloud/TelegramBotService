@@ -13,11 +13,18 @@ namespace DBContext
     {
 
         SqlLiteDBContext _sqlLiteDBContext = new SqlLiteDBContext();
+        User CurrentUser { get; set; }
+        int CurrentMessageId { get; set; }
 
-        public DBProvider()
+
+
+        public DBProvider(string chatIdAsString, string messageIdAsString)
         {
             _sqlLiteDBContext = new SqlLiteDBContext();
             _sqlLiteDBContext.Database.EnsureCreatedAsync();
+
+            CurrentUser = GetUserByChatID(int.Parse(chatIdAsString));
+            CurrentMessageId = int.Parse(messageIdAsString);
         }
 
         public string AddFunds(string payerIdAsString, string countAsString, string messageIdAsString, string chatIdAsString)
@@ -36,7 +43,7 @@ namespace DBContext
 
             var payers = _sqlLiteDBContext.Payers;
 
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
             Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
             
@@ -80,7 +87,7 @@ namespace DBContext
 
             var payers = _sqlLiteDBContext.Payers;
             
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
 
             if (currentShoppingList is null)
@@ -127,7 +134,7 @@ namespace DBContext
 
             var product = _sqlLiteDBContext.Products;
 
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
 
             if (currentShoppingList is null)
@@ -172,7 +179,7 @@ namespace DBContext
 
             //var shoppingList = _sqlLiteDBContext.ShoppingList.ToList();
 
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
                      
             if (currentUser is null)
             {
@@ -210,7 +217,7 @@ namespace DBContext
 
         }
 
-        private void MakeShoppingListAsCurrent(Users currentUser, ShoppingList currentShoppingList)
+        private void MakeShoppingListAsCurrent(User currentUser, ShoppingList currentShoppingList)
         {
             var shoppingList = _sqlLiteDBContext.ShoppingList;
 
@@ -230,11 +237,11 @@ namespace DBContext
 
             var users = _sqlLiteDBContext.Users;
 
-            Users user = GetUserByChatID(chatId);
+            User user = GetUserByChatID(chatId);
 
             if (user is null)
             {
-                users.Add(new Users()
+                users.Add(new User()
                 {
                     Name = name,
                     ChatID = chatId
@@ -271,7 +278,7 @@ namespace DBContext
             var payers = _sqlLiteDBContext.Payers;
             var shoppingList = _sqlLiteDBContext.ShoppingList.ToList().Where(x=>x.Owner.ID==chatId);
 
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
 
             if (currentUser is null)
             {
@@ -482,7 +489,7 @@ namespace DBContext
 
             var payers = _sqlLiteDBContext.Payers;
 
-            Users currentUser = GetUserByChatID(chatId);
+            User currentUser = GetUserByChatID(chatId);
             ShoppingList currentShoppingList = GetCurrentShoppingList(currentUser);
             Payers payer = _sqlLiteDBContext.Payers.Find(payerId);
 
@@ -631,7 +638,7 @@ namespace DBContext
             _sqlLiteDBContext.SaveChangesAsync();
         }
 
-        private ShoppingList GetCurrentShoppingList(Users currentUser)
+        private ShoppingList GetCurrentShoppingList(User currentUser)
         {
             if (_sqlLiteDBContext.ShoppingList.ToList().Where(x => x.Owner == currentUser && x.Current).Count() != 0)
             {
@@ -641,7 +648,7 @@ namespace DBContext
             return null;
         }
 
-        private Users GetUserByChatID(long chatId)
+        private User GetUserByChatID(long chatId)
         {
             return _sqlLiteDBContext.Users.ToList().Where(x => x.ChatID == chatId).FirstOrDefault();
         }

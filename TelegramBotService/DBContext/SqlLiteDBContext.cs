@@ -11,7 +11,7 @@ namespace TelegramBotService.DBContext
     {
         public DbSet<Product> Products { get; set; }
         public DbSet<ShoppingList> ShoppingList { get; set; }
-        public DbSet<Users> Users { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Payers> Payers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,8 +39,8 @@ namespace TelegramBotService.DBContext
                 entity.HasIndex(i => i.Name);
             });
 
-            modelBuilder.Entity<Users>().ToTable("Users");
-            modelBuilder.Entity<Users>(entity =>
+            modelBuilder.Entity<User>().ToTable("Users");
+            modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(k => k.ID);
                 entity.HasIndex(i => i.Name);

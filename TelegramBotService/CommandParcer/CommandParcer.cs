@@ -43,7 +43,7 @@ namespace CommandParcer
 
                     command = "/addupdate";
 
-                    MethodProvider methodProviderUpdate = new MethodProvider(new DBProvider());
+                    MethodProvider methodProviderUpdate = new MethodProvider(new DBProvider(ChatId, MessageId));
 
                     return methodProviderUpdate.Invoke(command, args.ToArray());
                 }
