@@ -22,7 +22,6 @@ namespace Interfaces
 
         public string Show(string shoppingListId);
 
-
         public string Start();
 
         public string GetCountingByPayers();
