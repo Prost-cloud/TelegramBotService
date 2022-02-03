@@ -2,7 +2,7 @@
 
 namespace Models
 {
-    public class Payers
+    public class Payer
     {
         public int ID { get; set; }
         public string Name { get; set; }
