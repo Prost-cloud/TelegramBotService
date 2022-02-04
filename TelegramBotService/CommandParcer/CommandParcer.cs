@@ -8,7 +8,7 @@ using TelegramBotService.DBContext;
 
 namespace CommandParcer
 {
-    public class Parcer
+    public class Parcer : IDisposable
     {
         public string Name { get; private set; }
         public bool IsUpdate { get; private set; }
@@ -19,7 +19,7 @@ namespace CommandParcer
         {            
             Name = name;
             IsUpdate = isUpdate;
-            this._methodProvider = new MethodProvider(new DBProvider(chatId, messageId, name, chatId));
+            this._methodProvider = new MethodProvider(new MethodProcessor(chatId, messageId, name));
         }
 
         public string ParceCommand(string command)
@@ -134,6 +134,11 @@ namespace CommandParcer
                 newArgs.Add(args[i]);
             }
             return newArgs;
+        }
+
+        public void Dispose()
+        {
+            _methodProvider.Dispose();
         }
     }
 }

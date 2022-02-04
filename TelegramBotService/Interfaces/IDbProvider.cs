@@ -1,32 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 using Models;
-using TelegramBotService.DBContext;
 
 namespace Interfaces
 {
-    public interface IDbProvider
-    {
-        public string AddProduct(string name, string cost);
-        public string UpdateProduct(string name, string cost);
-        public string DeleteProduct(string id);
-        public string AddPayer(string name);
-        public string DeletePayer(string id);
-        public string AddFunds(string payerId, string count);
-        public string RemoveFunds(string payerId, string count);
-        public string AddShoppingList(string name);
-        public string DeleteShoppingList(string id);
-        public string SelectShoppingList(string id);
-
-        public string Show(string shoppingListId);
-
-        public string Start();
-
-        public string GetCountingByPayers();
-        public string GetShoppingLists();
-
+    interface IDbProvider : IDisposable
+    {    
+        public User AddUser(string name, long chatId);
+        public void AddPayer(Payer payer);
+        public void AddFundsToUser(decimal count, Payer payer);
+        public void AddProduct(Product product);
+        public void AddShoppingList(ShoppingList shoppingList);
+        public Payer GetPayerById(int payerId);
+        public User GetUserByChatId(long chatId);
+        public ShoppingList GetShoppingListById(int shoppingListId);
+        public ShoppingList GetCurrentShoppingListByUser(User user);
+        public List<ShoppingList> GetAllShoppingListNotDeletedByUser(User user);
+        public List<Payer> GetAllPayerNotDeletedByShoppingList(ShoppingList shoppingList);
+        public List<Product> GetAllProductNotDeletedByShoppingList(ShoppingList shoppingList);
+        public Product GetProductByMessageId(int messageId);
+        public Product GetProductById(int id);
+        public void MakeShoppingListAsCurrent(ShoppingList shoppingList);
+        public void MarkAsDeletePayer(Payer payer);
+        public void MarkAsDeleteProduct(Product product);
+        public void MarkAsDeleteShoppingList(ShoppingList shoppingList);
+        public void UpdateProduct(Product product, string name, decimal newPrice);
     }
-    
 }

@@ -5,7 +5,7 @@ using CommandParcer;
 
 namespace HandleMessage
 {
-    class HandleMessage
+    class HandleMessage : IDisposable
     {
         public string Message { get; private set; }
         public long ChatId { get; private set; }
@@ -13,6 +13,7 @@ namespace HandleMessage
         public string Name { get; private set; }
         public string Result { get; private set; }
         public bool IsUpdate { get; private set; }
+        private Parcer _parser;
 
         public HandleMessage(string messageText, long chatId, int messageId, string name) : this(messageText, chatId, messageId, name, false) { }
         
@@ -23,14 +24,19 @@ namespace HandleMessage
             MessageId = messageId;
             Name = name;
             IsUpdate = isUpdate;
+
+            _parser = new Parcer(ChatId, MessageId, Name, IsUpdate);
         }
 
         public void Invoke()
         {
-            Parcer parcer = new Parcer(ChatId, MessageId, Name, IsUpdate);
-            Result = parcer.ParceCommand(Message);
+            Result = _parser.ParceCommand(Message);
 
         }
 
+        public void Dispose()
+        {
+            _parser.Dispose();
+        }
     }
 }

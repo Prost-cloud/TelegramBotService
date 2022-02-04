@@ -89,18 +89,21 @@ namespace TelegramBotService
                 var name = update.Message.Chat.Username;
 
                 //Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
-                HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name);
-
-                handleMessage.Invoke();
 #if DEBUG
                 Console.WriteLine("\nget message:");
                 Console.WriteLine($"ID: {update.Message.MessageId} Text:{update.Message.Text}");
                 Console.WriteLine($"chat ID:{chatId} Name:{name}\n");
 #endif
-                Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: chatId,
-                    text: handleMessage.Result,
-                    cancellationToken: cancellationToken);
+                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name))
+                {
+
+                    handleMessage.Invoke();
+
+                    Message sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: chatId,
+                        text: handleMessage.Result,
+                        cancellationToken: cancellationToken);
+                }              
             }
             else if (update.Type == UpdateType.EditedMessage)
             {

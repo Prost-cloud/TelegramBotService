@@ -8,10 +8,6 @@ namespace TelegramBotService
     {
         static async Task Main(string[] args)
         {
-            //var dbName = "sqlitedb.db";
-
-            
-
             CreateHostBuilder(args).Build().Run();
         }
 
@@ -21,8 +17,5 @@ namespace TelegramBotService
                 {
                     services.AddHostedService<Worker>();                
                 });
-
-      
-
     }
 }
