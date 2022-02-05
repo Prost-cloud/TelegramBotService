@@ -30,10 +30,7 @@ namespace DBContext
             }
 
             _currentShoppingList = _dbProvider.GetCurrentShoppingListByUser(_currentUser);
-
         }
-
-
 
         public string AddFunds(string payerIdAsString, string countAsString)
         {
@@ -52,13 +49,12 @@ namespace DBContext
                 return "Can't find current shopping list use /create \"name\" to create new one";
             }
 
-
-            if (payer.ShoppingList != _currentShoppingList && !payer.IsDeleted)
+            if (!IsPayerInCurrentShoppingListAndNotDeleted(payer))
             {
                 return "That payer is not in current shopping list or deleted";
             }
 
-            _dbProvider.AddFundsToUser(count, payer);           
+            _dbProvider.AddFundsToUser(count, payer);
 
             return $"Success added {countAsString} to payer";
         }
@@ -171,7 +167,7 @@ namespace DBContext
             {
                 return "Use \"/delete (product id)\"";
             }
-                        
+
             var currentProduct = _dbProvider.GetProductById(productId);
 
             if (currentProduct is null)
@@ -179,9 +175,7 @@ namespace DBContext
                 return $"Can't find that product by id {productId}";
             }
 
-            bool isInCurrentShoppingList =
-                _dbProvider.GetAllProductNotDeletedByShoppingList(_currentShoppingList)
-                .Where(x => x == currentProduct && x.ShoppingList == _currentShoppingList).Count() == 1;
+            bool isInCurrentShoppingList = IsProductInCurrentShoppingList(currentProduct);
 
             if (!isInCurrentShoppingList)
             {
@@ -189,10 +183,9 @@ namespace DBContext
             }
 
             _dbProvider.MarkAsDeleteProduct(currentProduct);
-           
+
             return $"Product deleted {currentProduct.Name}";
         }
-
 
 
         public string DeleteShoppingList(string idShoppingListAsString)
@@ -202,21 +195,19 @@ namespace DBContext
             {
                 return "Use \"/deleteshoppinglist (shopping list id)\"";
             }
-
-            bool isShoppingListOfCurrentUser
-                = _dbProvider.GetAllShoppingListNotDeletedByUser(_currentUser)
-                    .Where(x => x.ID == shoppingListId && x.Owner == _currentUser).Count() == 1;
+            bool isShoppingListOfCurrentUser = IsShoppingListOfCurrentUser(shoppingListId);
 
             if (!isShoppingListOfCurrentUser)
             {
                 return $"Can't find shopping list with id {shoppingListId} or it's not yours.";
             }
 
-            var shoppingList = _dbProvider.GetShoppingListById(shoppingListId);   
+            var shoppingList = _dbProvider.GetShoppingListById(shoppingListId);
             _dbProvider.MarkAsDeleteShoppingList(shoppingList);
 
             return $"Shopping list deleted.";
         }
+
 
         public string GetCountingByPayers()
         {
@@ -258,7 +249,6 @@ namespace DBContext
             result.Append($"sum of products {sumOfProduct} - payed {sumPayed}");
 
             return result.ToString();
-
         }
 
         public string GetShoppingLists()
@@ -280,7 +270,6 @@ namespace DBContext
             }
 
             return result.ToString();
-
         }
 
         public string RemoveFunds(string payerIdAsString, string countAsString)
@@ -300,7 +289,7 @@ namespace DBContext
                 return "Can't find current shopping list";
             }
                
-            if (payer.ShoppingList == _currentShoppingList && payer.IsDeleted)
+            if (!IsPayerInCurrentShoppingListAndNotDeleted(payer))
             {
                 return "That payer is not in current shopping list or deleted";
             }
@@ -320,7 +309,7 @@ namespace DBContext
 
             var selectedShoppingList = _dbProvider.GetShoppingListById(idShoppingList);
 
-            if (selectedShoppingList.Owner != _currentUser)
+            if (!IsShoppingListOfCurrentUser(idShoppingList))
             {
                 return "That's shopping list is not yours";
             }
@@ -344,7 +333,7 @@ namespace DBContext
                 return $"can't find shopping list with id {idShoppingList}";
             }    
             
-            if (currentShoppingList.Owner != _currentUser)
+            if (!IsShoppingListOfCurrentUser(idShoppingList))
             {
                 return $"That list is not yours";
             }
@@ -388,7 +377,22 @@ namespace DBContext
 
             return $"Success updated {name} with {cost}";
         }
+        private bool IsPayerInCurrentShoppingListAndNotDeleted(Payer payer)
+        {
+            return payer.ShoppingList == _currentShoppingList && !payer.IsDeleted;
+        }
 
+        private bool IsProductInCurrentShoppingList(Product currentProduct)
+        {
+            return _dbProvider.GetAllProductNotDeletedByShoppingList(_currentShoppingList)
+                            .Where(x => x == currentProduct && x.ShoppingList == _currentShoppingList).Count() == 1;
+        }
+
+        private bool IsShoppingListOfCurrentUser(int shoppingListId)
+        {
+            return _dbProvider.GetAllShoppingListNotDeletedByUser(_currentUser)
+                    .Where(x => x.ID == shoppingListId && x.Owner == _currentUser).Count() == 1;
+        }
         public void Dispose()
         {
             _dbProvider.Dispose();
