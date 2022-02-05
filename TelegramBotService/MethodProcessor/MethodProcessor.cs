@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Telegram.Bot.Types;
 using TelegramBotService.DBContext;
 
 namespace DBContext
@@ -13,19 +14,19 @@ namespace DBContext
     {
 
         IDbProvider _dbProvider = new DbProvider();
-        User _currentUser { get; set; }
+        Models.User _currentUser { get; set; }
         int _currentMessageId { get; set; }
         ShoppingList _currentShoppingList { get; set; }
 
 
-        public MethodProcessor(long chatId, int messageIdAsString, string name)
+        public MethodProcessor(Message message)
         {            
-            _currentMessageId = messageIdAsString;
-            _currentUser = _dbProvider.GetUserByChatId(chatId);
+            _currentMessageId = message.MessageId;
+            _currentUser = _dbProvider.GetUserByChatId(message.Chat.Id);
 
-            if (_currentUser == default(User))
+            if (_currentUser == default(Models.User))
             {
-                _currentUser = _dbProvider.AddUser(name, chatId);
+                _currentUser = _dbProvider.AddUser(message.Chat.Username, message.Chat.Id);
             }
 
             _currentShoppingList = _dbProvider.GetCurrentShoppingListByUser(_currentUser);
