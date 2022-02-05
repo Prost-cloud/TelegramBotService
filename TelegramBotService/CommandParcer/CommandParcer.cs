@@ -86,7 +86,7 @@ namespace CommandParcer
 
             if (args is null)  
                 return DefaultOfCommand(command);               
-                       
+ 
             return _methodProvider.Invoke(command, args.ToArray());
         }
 
@@ -101,10 +101,6 @@ namespace CommandParcer
 
         private List<string> CreateArgs(string name, List<string> args)
         {
-
-
-
-
             if (!_comandCountOfArgs.ContainsKey(name))
             {
                 return null;

@@ -50,8 +50,6 @@ namespace TelegramBotService
                 receiverOptions,
                 cancellationToken: cts.Token);
 
-            
-
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
@@ -59,7 +57,6 @@ namespace TelegramBotService
             }
 
             cts.Cancel();
-
         }
 
         static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -78,7 +75,6 @@ namespace TelegramBotService
                 if (update.EditedMessage.Type != MessageType.Text)
                     return;
             }
-
 
             // Echo received message text
             if (update.Type == UpdateType.Message)
@@ -131,7 +127,5 @@ namespace TelegramBotService
             Console.WriteLine(ErrorMessage);
             return Task.CompletedTask;
         }
-
-       
     }
 }
