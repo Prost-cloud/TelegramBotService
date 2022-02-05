@@ -83,43 +83,38 @@ namespace TelegramBotService
             // Echo received message text
             if (update.Type == UpdateType.Message)
             {
-                var chatId = update.Message.Chat.Id;
-                var messageText = update.Message.Text;
-                var messageId = update.Message.MessageId;
-                var name = update.Message.Chat.Username;
+                var updateMessage = update.Message;
 
                 //Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
 #if DEBUG
                 Console.WriteLine("\nget message:");
-                Console.WriteLine($"ID: {update.Message.MessageId} Text:{update.Message.Text}");
-                Console.WriteLine($"chat ID:{chatId} Name:{name}\n");
+                Console.WriteLine($"ID: {updateMessage.MessageId} Text:{updateMessage.Text}");
+                Console.WriteLine($"chat ID:{updateMessage.Chat.Id} Name:{updateMessage.Chat.Username}\n");
 #endif
-                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name))
+                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage))
                 {
 
                     handleMessage.Invoke();
 
                     Message sentMessage = await botClient.SendTextMessageAsync(
-                        chatId: chatId,
+                        chatId: updateMessage.Chat.Id,
                         text: handleMessage.Result,
                         cancellationToken: cancellationToken);
                 }              
             }
             else if (update.Type == UpdateType.EditedMessage)
             {
-                var chatId = update.EditedMessage.Chat.Id;
-                var messageText = update.EditedMessage.Text;
-                var messageId = update.EditedMessage.MessageId;
-                var name = update.EditedMessage.Chat.Username;
-               
-                HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(messageText, chatId, messageId, name, true);
+
+                var updateMessage = update.Message;
+
+                HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage, true);
 
                 handleMessage.Invoke();
 #if DEBUG
-                Console.WriteLine($"\nEdidet a '{messageText}' message in chat {chatId}. Message id:{messageId}\n");
+                Console.WriteLine($"\nEdidet a '{updateMessage.Text}' message in chat {updateMessage.Chat.Id}. Message id:{updateMessage.Chat.Id}\n");
 #endif
                 Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: chatId,
+                    chatId: updateMessage.Chat.Id,
                     text: handleMessage.Result,
                     cancellationToken: cancellationToken);
             }

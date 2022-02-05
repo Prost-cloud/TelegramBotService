@@ -4,22 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Telegram.Bot.Types;
 using TelegramBotService.DBContext;
 
 namespace CommandParcer
 {
     public class Parcer : IDisposable
     {
-        public string Name { get; private set; }
+        public Message Message { get; private set; }
         public bool IsUpdate { get; private set; }
 
         private MethodProvider _methodProvider;
 
-        public Parcer(long chatId, int messageId, string name, bool isUpdate)
+        public Parcer(Message message, bool isUpdate)
         {            
-            Name = name;
+            Message = message;
             IsUpdate = isUpdate;
-            this._methodProvider = new MethodProvider(new MethodProcessor(chatId, messageId, name));
+            this._methodProvider = new MethodProvider(new MethodProcessor(message));
         }
 
         public string ParceCommand(string command)
@@ -58,24 +59,24 @@ namespace CommandParcer
 
         private string DefaultOfCommand(string command)
         {
-            Dictionary<string, string> comandCountOfArgs = new Dictionary<string, string>();
+            Dictionary<string, string> comandDefaultReturn = new Dictionary<string, string>();
 
-            comandCountOfArgs.Add("/add", "Use /add (name) (cost)");                        
-            comandCountOfArgs.Add("/delete", "Use /delete (product ID)");                     
-            comandCountOfArgs.Add("/addpayer", "Use /addpayer (name)");                   
-            comandCountOfArgs.Add("/deletepayer", "Use /deletepayer (payer ID)");                
-            comandCountOfArgs.Add("/addfunds", "Use /addfunds (payer ID) (count)");                   
-            comandCountOfArgs.Add("/removefunds", "Use /removefunds (payer ID) (count)");                
-            comandCountOfArgs.Add("/create", "Use /create (name)");                     
-            comandCountOfArgs.Add("/deleteshoppinglist", "Use /deleteshoppinglist (shopping list ID)");         
-            comandCountOfArgs.Add("/select", "Use /select (shopping list ID)");                     
-            comandCountOfArgs.Add("/show", "Use /show (shopping list ID)");                       
+            comandDefaultReturn.Add("/add", "Use /add (name) (cost)");                        
+            comandDefaultReturn.Add("/delete", "Use /delete (product ID)");                     
+            comandDefaultReturn.Add("/addpayer", "Use /addpayer (name)");                   
+            comandDefaultReturn.Add("/deletepayer", "Use /deletepayer (payer ID)");                
+            comandDefaultReturn.Add("/addfunds", "Use /addfunds (payer ID) (count)");                   
+            comandDefaultReturn.Add("/removefunds", "Use /removefunds (payer ID) (count)");                
+            comandDefaultReturn.Add("/create", "Use /create (name)");                     
+            comandDefaultReturn.Add("/deleteshoppinglist", "Use /deleteshoppinglist (shopping list ID)");         
+            comandDefaultReturn.Add("/select", "Use /select (shopping list ID)");                     
+            comandDefaultReturn.Add("/show", "Use /show (shopping list ID)");                       
 
-            if (!comandCountOfArgs.ContainsKey(command))
+            if (!comandDefaultReturn.ContainsKey(command))
             {
                 return "I don't know that command yet :(";
             }
-            return comandCountOfArgs[command];
+            return comandDefaultReturn[command];
         }
 
         private List<string> CreateArgs(string name, List<string> args)
