@@ -6,7 +6,8 @@ using Models;
 namespace Interfaces
 {
     interface IDbProvider : IDisposable
-    {    
+    {
+
         public User AddUser(string name, long chatId);
         public void AddPayer(Payer payer);
         public void AddFundsToUser(decimal count, Payer payer);
@@ -26,5 +27,6 @@ namespace Interfaces
         public void MarkAsDeleteProduct(Product product);
         public void MarkAsDeleteShoppingList(ShoppingList shoppingList);
         public void UpdateProduct(Product product, string name, decimal newPrice);
+
     }
 }

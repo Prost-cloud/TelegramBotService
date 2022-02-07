@@ -21,8 +21,10 @@ namespace TelegramBotService.DBContext
 
         public void AddFundsToUser(decimal count, Payer payer)
         {
-            var payers = _sqlLiteDBContext.Payers;
-            payers.Where(x => x == payer).AsQueryable().ForEachAsync(x => x.Payed += count);
+            // var payers = _sqlLiteDBContext.Payers;
+            // payers.Where(x => x == payer).AsQueryable().ForEachAsync(x => x.Payed += count);
+
+            payer.Payed += count;
         }
 
         public void AddPayer(Payer payer)
@@ -106,33 +108,33 @@ namespace TelegramBotService.DBContext
             _sqlLiteDBContext.ShoppingList.Where(x => x.Owner == currentUser).AsQueryable()
                 .ForEachAsync(x=>x.Current=false);
 
-            _sqlLiteDBContext.ShoppingList.Where(x => x == shoppingList).AsQueryable()
-                .ForEachAsync(x => x.Current = true);            
+            shoppingList.Current = true;            
         }
 
         public void MarkAsDeletePayer(Payer payer)
         {
-            _sqlLiteDBContext.Payers.Where(x => x == payer).AsQueryable()
-                .ForEachAsync(x => x.IsDeleted = true);
+                payer.IsDeleted = true;
         }
 
         public void MarkAsDeleteProduct(Product product)
         {
-            _sqlLiteDBContext.Products.Where(x => x == product).AsQueryable()
-                .ForEachAsync(x => x.IsDeleted = true);
+                product.IsDeleted = true;
         }
 
         public void MarkAsDeleteShoppingList(ShoppingList shoppingList)
         {
-            _sqlLiteDBContext.ShoppingList.Where(x => x == shoppingList).AsQueryable()
-                .ForEachAsync(x => x.IsDeleted = true);
+                shoppingList.IsDeleted = true;
         }
 
         public void UpdateProduct(Product product, string name, decimal newPrice)
         {
-            _sqlLiteDBContext.Products.Where(x => x == product)
-                .AsQueryable()
-                .ForEachAsync(x => { x.Name = name; x.Price = newPrice; });
+          //  _sqlLiteDBContext.Products.Where(x => x == product)
+          //      .AsQueryable()
+          //      .ForEachAsync(x => { x.Name = name; x.Price = newPrice; });
+
+            product.Name = name;
+            product.Price = newPrice;
+          // _sqlLiteDBContext.upda
         }
 
         public List<Product> GetAllProductNotDeletedByShoppingList(ShoppingList shoppingList)
@@ -148,7 +150,7 @@ namespace TelegramBotService.DBContext
             }
             catch (DbUpdateException)
             {
-
+                Console.WriteLine("db exception in dispose");
             }
         }
     }

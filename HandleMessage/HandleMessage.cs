@@ -6,7 +6,7 @@ using Telegram.Bot.Types;
 
 namespace HandleMessage
 {
-    class HandleMessage : IDisposable
+    public class HandleMessage : IDisposable, IHandleMessage
     {
         public Message Message { get; private set; }
         public string Result { get; private set; }
@@ -14,7 +14,7 @@ namespace HandleMessage
         private Parcer _parser;
 
         public HandleMessage(Message message) : this(message, false) { }
-        
+
         public HandleMessage(Message message, bool isUpdate)
         {
             Message = message;

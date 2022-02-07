@@ -8,6 +8,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using HandleMessage;
 
 namespace TelegramBotService
 {
@@ -32,12 +33,12 @@ namespace TelegramBotService
             {
                 throw new System.IO.FileNotFoundException("Create TelegramApi.txt with token in program root");
             }
+
             string _token = file[0];
 
             TelegramBotClient botClient = new TelegramBotClient(_token);
 
             using var cts = new CancellationTokenSource();
-
 
             // StartReceiving does not block the caller thread. Receiving is done on the ThreadPool.
             var receiverOptions = new ReceiverOptions
@@ -50,6 +51,8 @@ namespace TelegramBotService
                 receiverOptions,
                 cancellationToken: cts.Token);
 
+
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
@@ -57,14 +60,15 @@ namespace TelegramBotService
             }
 
             cts.Cancel();
+
         }
 
         static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            // Only process Message updates: https://core.telegram.org/bots/api#message
+
             if (!(update.Type == UpdateType.Message || update.Type == UpdateType.EditedMessage))
                 return;
-            // Only process text messages
+
             if (update.Type == UpdateType.Message)
             {
                 if (update.Message!.Type != MessageType.Text)
@@ -96,23 +100,25 @@ namespace TelegramBotService
                         chatId: updateMessage.Chat.Id,
                         text: handleMessage.Result,
                         cancellationToken: cancellationToken);
-                }              
+                }
             }
             else if (update.Type == UpdateType.EditedMessage)
             {
 
-                var updateMessage = update.Message;
+                var updateMessage = update.EditedMessage;
 
-                HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage, true);
+                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage, true))
+                {
 
-                handleMessage.Invoke();
+                    handleMessage.Invoke();
 #if DEBUG
-                Console.WriteLine($"\nEdidet a '{updateMessage.Text}' message in chat {updateMessage.Chat.Id}. Message id:{updateMessage.Chat.Id}\n");
+                    Console.WriteLine($"\nEditet a '{updateMessage.Text}' message in chat {updateMessage.Chat.Id}. Message id:{updateMessage.Chat.Id}\n");
 #endif
-                Message sentMessage = await botClient.SendTextMessageAsync(
-                    chatId: updateMessage.Chat.Id,
-                    text: handleMessage.Result,
-                    cancellationToken: cancellationToken);
+                    Message sentMessage = await botClient.SendTextMessageAsync(
+                        chatId: updateMessage.Chat.Id,
+                        text: handleMessage.Result,
+                        cancellationToken: cancellationToken);
+                }
             }
         }
         static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)

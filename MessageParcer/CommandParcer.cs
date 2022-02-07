@@ -9,22 +9,22 @@ using TelegramBotService.DBContext;
 
 namespace CommandParcer
 {
-    public class Parcer : IDisposable
+    public class Parcer : IParcer, IDisposable
     {
-        private readonly Dictionary<string, string> _comandDefaultReturn;
-        private readonly Dictionary<string, int> _comandCountOfArgs;
+        private readonly Dictionary<string, string> _commandDefaultReturn;
+        private readonly Dictionary<string, int> _commandCountOfArgs;
         public Message Message { get; private set; }
         public bool IsUpdate { get; private set; }
 
         private readonly MethodProvider _methodProvider;
 
         public Parcer(Message message, bool isUpdate)
-        {            
+        {
             Message = message;
             IsUpdate = isUpdate;
             this._methodProvider = new MethodProvider(new MethodProcessor(message));
 
-            _comandDefaultReturn = new Dictionary<string, string>
+            _commandDefaultReturn = new Dictionary<string, string>
             {
                 { "/add", "Use /add (name) (cost)" },
                 { "/delete", "Use /delete (product ID)" },
@@ -38,7 +38,7 @@ namespace CommandParcer
                 { "/show", "Use /show (shopping list ID)" }
             };
 
-            _comandCountOfArgs = new Dictionary<string, int>
+            _commandCountOfArgs = new Dictionary<string, int>
             {
                 { "/add", 2 },
                 { "/delete", 1 },
@@ -80,55 +80,56 @@ namespace CommandParcer
             command = args[0];
             args.RemoveAt(0);
 
-            command = command.ToLower();           
+            command = command.ToLower();
 
             args = CreateArgs(command, args);
 
-            if (args is null)  
-                return DefaultOfCommand(command);               
- 
+            if (args is null)
+                return DefaultOfCommand(command);
+
             return _methodProvider.Invoke(command, args.ToArray());
         }
 
         private string DefaultOfCommand(string command)
         {
-            if (!_comandDefaultReturn.ContainsKey(command))
+            if (!_commandDefaultReturn.ContainsKey(command))
             {
                 return "I don't know that command yet :(";
             }
-            return _comandDefaultReturn[command];
+            return _commandDefaultReturn[command];
         }
 
         private List<string> CreateArgs(string name, List<string> args)
         {
-            if (!_comandCountOfArgs.ContainsKey(name))
+
+            if (!_commandCountOfArgs.ContainsKey(name))
             {
                 return null;
             }
 
-            if (args.Count == _comandCountOfArgs[name])
+            if (args.Count == _commandCountOfArgs[name])
             {
                 return args;
             }
-            if(args.Count < _comandCountOfArgs[name])
+            if (args.Count < _commandCountOfArgs[name])
             {
                 return null;
             }
 
-            if(_comandCountOfArgs[name] == 0)
+            if (_commandCountOfArgs[name] == 0)
             {
                 return new List<string>();
             }
 
             List<string> newArgs = new List<string>();
 
-            int difference = args.Count() - _comandCountOfArgs[name];
+            int difference = args.Count() - _commandCountOfArgs[name];
 
             string newName = string.Empty;
 
             for (int i = 0; i <= difference; i++)
             {
-                newName += args[i] + " ";     
+                newName += args[i] + " ";
             }
 
             newArgs.Add(newName);

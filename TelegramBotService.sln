@@ -1,9 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.32002.261
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelegramBotService", "TelegramBotService\TelegramBotService.csproj", "{743CD257-1C99-49CE-92F7-31720151937E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBProvider", "DBProvider\DBProvider.csproj", "{4F009594-5243-4AA2-AA86-C3136833DEAD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodProvider", "MethodProvider\MethodProvider.csproj", "{1D577D29-7B3E-465C-A359-F8C143D21272}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Models", "Models\Models.csproj", "{B645B1EE-4258-433C-924E-838AA2D7C31B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandleMessage", "HandleMessage\HandleMessage.csproj", "{18E4817A-FAA0-4887-9E27-471BF0CFB2F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodProcessor", "MethodProcessor\MethodProcessor.csproj", "{8F3E8661-9D93-4454-AD46-F35716B71975}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessageParcer", "MessageParcer\MessageParcer.csproj", "{04A9289F-4B44-4F2D-A3C5-07F7B058D8DB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +27,30 @@ Global
 		{743CD257-1C99-49CE-92F7-31720151937E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{743CD257-1C99-49CE-92F7-31720151937E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{743CD257-1C99-49CE-92F7-31720151937E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F009594-5243-4AA2-AA86-C3136833DEAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F009594-5243-4AA2-AA86-C3136833DEAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F009594-5243-4AA2-AA86-C3136833DEAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F009594-5243-4AA2-AA86-C3136833DEAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D577D29-7B3E-465C-A359-F8C143D21272}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D577D29-7B3E-465C-A359-F8C143D21272}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D577D29-7B3E-465C-A359-F8C143D21272}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D577D29-7B3E-465C-A359-F8C143D21272}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B645B1EE-4258-433C-924E-838AA2D7C31B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B645B1EE-4258-433C-924E-838AA2D7C31B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B645B1EE-4258-433C-924E-838AA2D7C31B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B645B1EE-4258-433C-924E-838AA2D7C31B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18E4817A-FAA0-4887-9E27-471BF0CFB2F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18E4817A-FAA0-4887-9E27-471BF0CFB2F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18E4817A-FAA0-4887-9E27-471BF0CFB2F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18E4817A-FAA0-4887-9E27-471BF0CFB2F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F3E8661-9D93-4454-AD46-F35716B71975}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F3E8661-9D93-4454-AD46-F35716B71975}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F3E8661-9D93-4454-AD46-F35716B71975}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F3E8661-9D93-4454-AD46-F35716B71975}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04A9289F-4B44-4F2D-A3C5-07F7B058D8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04A9289F-4B44-4F2D-A3C5-07F7B058D8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04A9289F-4B44-4F2D-A3C5-07F7B058D8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04A9289F-4B44-4F2D-A3C5-07F7B058D8DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
