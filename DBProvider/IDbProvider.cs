@@ -5,7 +5,7 @@ using Models;
 
 namespace Interfaces
 {
-    interface IDbProvider : IDisposable
+    public interface IDbProvider : IDisposable
     {
 
         public User AddUser(string name, long chatId);

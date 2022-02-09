@@ -8,7 +8,7 @@ using System.Text;
 
 namespace TelegramBotService.DBContext
 {
-    class DbProvider : IDbProvider, IDisposable
+    public class DbProvider : IDbProvider, IDisposable
     {
 
         SqlLiteDBContext _sqlLiteDBContext;

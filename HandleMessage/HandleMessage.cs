@@ -2,35 +2,44 @@
 using System.Collections.Generic;
 using System.Text;
 using CommandParcer;
+using MethodProcessor;
 using Telegram.Bot.Types;
 
 namespace HandleMessage
 {
-    public class HandleMessage : IDisposable, IHandleMessage
+    public class HandleMessage : IHandleMessage
     {
         public Message Message { get; private set; }
         public string Result { get; private set; }
         public bool IsUpdate { get; private set; }
-        private Parcer _parser;
+        private IParcer _parser;
+        private IMethodProvider _methodProvider;
+        private IMethodProcessor _methodProcessor;
 
-        public HandleMessage(Message message) : this(message, false) { }
+        public HandleMessage(IParcer parcer, IMethodProvider methodProvider, IMethodProcessor iMethodProcessor)
+        {
+            _parser = parcer;
+            _methodProvider = methodProvider;
+            _methodProcessor = iMethodProcessor;
+        }
 
-        public HandleMessage(Message message, bool isUpdate)
+        public void Invoke(Message message, bool isUpdate)
         {
             Message = message;
-            IsUpdate = isUpdate;
+            IsUpdate = isUpdate;  
 
-            _parser = new Parcer(Message, IsUpdate);
-        }
+            if(!_parser.TryParceCommand(Message.Text))
+            {
+                Result = "Add class to get return for command";
+            }
 
-        public void Invoke()
-        {
-            Result = _parser.ParceCommand(Message.Text);
-        }
+            if(!_methodProvider.TryGetCommandDelegate(_parser.Command, _parser.Args.ToArray(), out var @delegate))
+            {
+                Result = "i don't know that command";
+            }
 
-        public void Dispose()
-        {
-            _parser.Dispose();
+            @delegate.DynamicInvoke(_parser.Args);
+
         }
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Models;
 using TelegramBotService.DBContext;
 
-namespace Interfaces
+namespace MethodProcessor
 {
     public interface IMethodProcessor
     {

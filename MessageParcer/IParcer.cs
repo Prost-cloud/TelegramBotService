@@ -1,12 +1,14 @@
-﻿using Telegram.Bot.Types;
+﻿using System.Collections.Generic;
 
 namespace CommandParcer
 {
     public interface IParcer
     {
         bool IsUpdate { get; }
-        Message Message { get; }
+        string Message { get; }
+        string Command { get;  }
+        List<string> Args { get;  }
 
-        string ParceCommand(string command);
+        bool TryParceCommand(string command);
     }
 }

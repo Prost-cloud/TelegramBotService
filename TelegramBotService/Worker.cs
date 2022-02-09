@@ -16,9 +16,12 @@ namespace TelegramBotService
     {
         private readonly ILogger<Worker> _logger;
 
-        public Worker(ILogger<Worker> logger)
+        private IHandleMessage _handleMessage;
+
+        public Worker(ILogger<Worker> logger, IHandleMessage handleMessage)
         {
             _logger = logger;
+            _handleMessage = handleMessage;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -63,7 +66,7 @@ namespace TelegramBotService
 
         }
 
-        static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+         async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
 
             if (!(update.Type == UpdateType.Message || update.Type == UpdateType.EditedMessage))
@@ -91,37 +94,29 @@ namespace TelegramBotService
                 Console.WriteLine($"ID: {updateMessage.MessageId} Text:{updateMessage.Text}");
                 Console.WriteLine($"chat ID:{updateMessage.Chat.Id} Name:{updateMessage.Chat.Username}\n");
 #endif
-                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage))
-                {
-
-                    handleMessage.Invoke();
+                    _handleMessage.Invoke(updateMessage, isUpdate: false);
 
                     Message sentMessage = await botClient.SendTextMessageAsync(
                         chatId: updateMessage.Chat.Id,
-                        text: handleMessage.Result,
+                        text: _handleMessage.Result,
                         cancellationToken: cancellationToken);
-                }
             }
             else if (update.Type == UpdateType.EditedMessage)
             {
 
                 var updateMessage = update.EditedMessage;
 
-                using (HandleMessage.HandleMessage handleMessage = new HandleMessage.HandleMessage(updateMessage, true))
-                {
-
-                    handleMessage.Invoke();
+                   _handleMessage.Invoke(updateMessage, isUpdate: true);
 #if DEBUG
                     Console.WriteLine($"\nEditet a '{updateMessage.Text}' message in chat {updateMessage.Chat.Id}. Message id:{updateMessage.Chat.Id}\n");
 #endif
                     Message sentMessage = await botClient.SendTextMessageAsync(
                         chatId: updateMessage.Chat.Id,
-                        text: handleMessage.Result,
+                        text: _handleMessage.Result,
                         cancellationToken: cancellationToken);
-                }
             }
         }
-        static Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
+         Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
             var ErrorMessage = exception switch
             {

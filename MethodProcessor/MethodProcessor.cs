@@ -1,14 +1,12 @@
 ﻿using Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Telegram.Bot.Types;
 using TelegramBotService.DBContext;
 
-namespace DBContext
+namespace MethodProcessor
 {
     public class MethodProcessor : IMethodProcessor, IDisposable
     {

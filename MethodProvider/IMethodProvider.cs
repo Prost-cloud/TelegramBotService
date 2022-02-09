@@ -1,7 +1,9 @@
-﻿namespace CommandParcer
+﻿using System;
+
+namespace CommandParcer
 {
     public interface IMethodProvider
     {
-        string Invoke(string method, params string[] args);
+        bool TryGetCommandDelegate(string method, string[] args, out Delegate returnDelegate);
     }
 }

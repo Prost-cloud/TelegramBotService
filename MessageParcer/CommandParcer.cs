@@ -1,42 +1,37 @@
-﻿using DBContext;
+﻿using MethodProcessor;
 using Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Telegram.Bot.Types;
-using TelegramBotService.DBContext;
 
 namespace CommandParcer
 {
-    public class Parcer : IParcer, IDisposable
+    public class Parcer : IParcer
     {
-        private readonly Dictionary<string, string> _commandDefaultReturn;
+        //private readonly Dictionary<string, string> _commandDefaultReturn;
         private readonly Dictionary<string, int> _commandCountOfArgs;
-        public Message Message { get; private set; }
+        public string Message { get; private set; }
         public bool IsUpdate { get; private set; }
+        public string Command { get; private set; }
+        public List<string> Args { get; private set; }
 
-        private readonly MethodProvider _methodProvider;
 
-        public Parcer(Message message, bool isUpdate)
+        public Parcer()
         {
-            Message = message;
-            IsUpdate = isUpdate;
-            this._methodProvider = new MethodProvider(new MethodProcessor(message));
 
-            _commandDefaultReturn = new Dictionary<string, string>
-            {
-                { "/add", "Use /add (name) (cost)" },
-                { "/delete", "Use /delete (product ID)" },
-                { "/addpayer", "Use /addpayer (name)" },
-                { "/deletepayer", "Use /deletepayer (payer ID)" },
-                { "/addfunds", "Use /addfunds (payer ID) (count)" },
-                { "/removefunds", "Use /removefunds (payer ID) (count)" },
-                { "/create", "Use /create (name)" },
-                { "/deleteshoppinglist", "Use /deleteshoppinglist (shopping list ID)" },
-                { "/select", "Use /select (shopping list ID)" },
-                { "/show", "Use /show (shopping list ID)" }
-            };
+            //_commandDefaultReturn = new Dictionary<string, string>
+            //{
+            //    { "/add", "Use /add (name) (cost)" },
+            //    { "/delete", "Use /delete (product ID)" },
+            //    { "/addpayer", "Use /addpayer (name)" },
+            //    { "/deletepayer", "Use /deletepayer (payer ID)" },
+            //    { "/addfunds", "Use /addfunds (payer ID) (count)" },
+            //    { "/removefunds", "Use /removefunds (payer ID) (count)" },
+            //    { "/create", "Use /create (name)" },
+            //    { "/deleteshoppinglist", "Use /deleteshoppinglist (shopping list ID)" },
+            //    { "/select", "Use /select (shopping list ID)" },
+            //    { "/show", "Use /show (shopping list ID)" }
+            //};
 
             _commandCountOfArgs = new Dictionary<string, int>
             {
@@ -56,7 +51,7 @@ namespace CommandParcer
             };
         }
 
-        public string ParceCommand(string command)
+        public bool TryParceCommand(string command)
         {
             List<string> args = command.Split(' ').ToList();
 
@@ -69,35 +64,35 @@ namespace CommandParcer
 
                 if (command == "/add")
                 {
-                    args = CreateArgs(command, args);
+                    Args = CreateArgs(command, args);
 
-                    command = "/addupdate";
-
-                    return _methodProvider.Invoke(command, args.ToArray());
+                    Command = "/addupdate";
+                    return true;
                 }
             }
 
-            command = args[0];
+            Command = args[0];
             args.RemoveAt(0);
 
-            command = command.ToLower();
+            Command = command.ToLower();
 
-            args = CreateArgs(command, args);
+            Args = CreateArgs(command, args);
 
-            if (args is null)
-                return DefaultOfCommand(command);
-
-            return _methodProvider.Invoke(command, args.ToArray());
-        }
-
-        private string DefaultOfCommand(string command)
-        {
-            if (!_commandDefaultReturn.ContainsKey(command))
+            if (Args is null)
             {
-                return "I don't know that command yet :(";
+                return false;
             }
-            return _commandDefaultReturn[command];
+            return true;
         }
+
+       //private string DefaultOfCommand(string command)
+       //{
+       //    if (!_commandDefaultReturn.ContainsKey(command))
+       //    {
+       //        return "I don't know that command yet :(";
+       //    }
+       //    return _commandDefaultReturn[command];
+       //}
 
         private List<string> CreateArgs(string name, List<string> args)
         {
@@ -140,9 +135,5 @@ namespace CommandParcer
             return newArgs;
         }
 
-        public void Dispose()
-        {
-            _methodProvider.Dispose();
-        }
     }
 }

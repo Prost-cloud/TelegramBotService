@@ -4,14 +4,15 @@ using System.Collections.Generic;
 
 namespace CommandParcer
 {
-    public class MethodProvider : IDisposable, IMethodProvider
+    public class MethodProvider : IMethodProvider
     {
         private readonly Dictionary<string, Delegate> _dictionaryMethod;
-        private readonly IMethodProcessor _methodProcessor;
+        private IMethodProcessor _methodProcessor;
 
-        public MethodProvider(IMethodProcessor methodProvider)
+
+        public MethodProvider(IMethodProcessor methodProcessor)
         {
-            _methodProcessor = methodProvider;
+            _methodProcessor = methodProcessor;
 
             _dictionaryMethod = new Dictionary<string, Delegate>();
 
@@ -31,18 +32,15 @@ namespace CommandParcer
             _dictionaryMethod.Add("/start", new Func<string>(_methodProcessor.Start));
         }
 
-        public void Dispose()
-        {
-            _methodProcessor.Dispose();
-        }
-
-        public string Invoke(string method, params string[] args)
+        public bool TryGetCommandDelegate(string method, string[] args, out Delegate returnDelegate)
         {
             if (_dictionaryMethod.TryGetValue(method, out var command))
             {
-                return (string)command.DynamicInvoke(args);
+                returnDelegate = command;
+                return true;
             }
-            return "I don't know that command";
+            returnDelegate = null;
+            return false;
         }
     }
 }

@@ -8,6 +8,6 @@ namespace HandleMessage
         Message Message { get; }
         string Result { get; }
 
-        void Invoke();
+        void Invoke(Message message, bool isUpdate);
     }
 }
