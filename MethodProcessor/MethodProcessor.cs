@@ -10,24 +10,14 @@ namespace MethodProcessor
 {
     public class MethodProcessor : IMethodProcessor, IDisposable
     {
+        readonly IDbProvider _dbProvider;
+        User CurrentUser { get; set; }
+        int CurrentMessageId { get; set; }
+        ShoppingList CurrentShoppingList { get; set; }
 
-        IDbProvider _dbProvider = new DbProvider();
-        Models.User _currentUser { get; set; }
-        int _currentMessageId { get; set; }
-        ShoppingList _currentShoppingList { get; set; }
-
-
-        public MethodProcessor(Message message)
-        {            
-            _currentMessageId = message.MessageId;
-            _currentUser = _dbProvider.GetUserByChatId(message.Chat.Id);
-
-            if (_currentUser == default(Models.User))
-            {
-                _currentUser = _dbProvider.AddUser(message.Chat.Username, message.Chat.Id);
-            }
-
-            _currentShoppingList = _dbProvider.GetCurrentShoppingListByUser(_currentUser);
+        public MethodProcessor(IDbProvider dbProvider)
+        {
+            _dbProvider = dbProvider;
         }
 
         public string AddFunds(string payerIdAsString, string countAsString)
@@ -42,7 +32,7 @@ namespace MethodProcessor
 
             Payer payer = _dbProvider.GetPayerById(payerId);
 
-            if (_currentShoppingList is null)
+            if (CurrentShoppingList is null)
             {
                 return "Can't find current shopping list use /create \"name\" to create new one";
             }
@@ -59,13 +49,13 @@ namespace MethodProcessor
 
         public string AddPayer(string name)
         {
-            
-            if (_currentShoppingList is null)
+
+            if (CurrentShoppingList is null)
             {
                 return "Can't find current shopping list";
             }
 
-            if (_currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -74,10 +64,10 @@ namespace MethodProcessor
             {
                 Name = name,
                 Payed = 0,
-                ShoppingList = _currentShoppingList
+                ShoppingList = CurrentShoppingList
             });
-                        
-            return $"Success added {name} to {_currentShoppingList}";
+
+            return $"Success added {name} to {CurrentShoppingList}";
         }
 
         public string AddProduct(string name, string costAsString)
@@ -89,12 +79,12 @@ namespace MethodProcessor
                 return "Use \"/add (name of product) (cost of product)\"";
             }
 
-            if (_currentShoppingList is null)
+            if (CurrentShoppingList is null)
             {
                 return "Can't find current shopping list";
             }
 
-            if (_currentUser is null)
+            if (CurrentUser is null)
             {
                 return "Can't find user write \"/start\"";
             }
@@ -103,25 +93,25 @@ namespace MethodProcessor
             {
                 Name = name,
                 Price = cost,
-                MessageID = _currentMessageId,
-                ShoppingList = _currentShoppingList,
+                MessageID = CurrentMessageId,
+                ShoppingList = CurrentShoppingList,
                 IsDeleted = false
-            });            
+            });
 
-            return $"Success added {name} to {_currentShoppingList}";
+            return $"Success added {name} to {CurrentShoppingList}";
         }
 
         public string AddShoppingList(string name)
-        {     
+        {
             ShoppingList currentShoppingList = new ShoppingList()
             {
                 Name = name,
-                Owner = _currentUser,
+                Owner = CurrentUser,
                 Current = false
             };
 
-            _dbProvider.AddShoppingList(currentShoppingList);           
-            _dbProvider.MakeShoppingListAsCurrent(currentShoppingList);            
+            _dbProvider.AddShoppingList(currentShoppingList);
+            _dbProvider.MakeShoppingListAsCurrent(currentShoppingList);
 
             return $"Success added {currentShoppingList}";
         }
@@ -130,7 +120,7 @@ namespace MethodProcessor
         {
             return "Hello!";
         }
-          
+
         public string DeletePayer(string idPayerAsString)
         {
 
@@ -140,8 +130,8 @@ namespace MethodProcessor
             }
 
             var currentPayer = _dbProvider.GetPayerById(payerId);
-            var shoppingLists = _dbProvider.GetAllShoppingListNotDeletedByUser(_currentUser);
-                
+            var shoppingLists = _dbProvider.GetAllShoppingListNotDeletedByUser(CurrentUser);
+
             if (currentPayer is null)
             {
                 return $"Can't find payer by that id{payerId}. Check ID and try one more time";
@@ -209,7 +199,7 @@ namespace MethodProcessor
 
         public string GetCountingByPayers()
         {
-            var payers = _dbProvider.GetAllPayerNotDeletedByShoppingList(_currentShoppingList);
+            var payers = _dbProvider.GetAllPayerNotDeletedByShoppingList(CurrentShoppingList);
 
             Dictionary<Payer, decimal> payed = new Dictionary<Payer, decimal>();
 
@@ -226,7 +216,7 @@ namespace MethodProcessor
                 sumPayed += payer.Payed;
             }
 
-            var sumOfProduct = _dbProvider.GetAllProductNotDeletedByShoppingList(_currentShoppingList).Sum(x => x.Price);
+            var sumOfProduct = _dbProvider.GetAllProductNotDeletedByShoppingList(CurrentShoppingList).Sum(x => x.Price);
 
             var separetedSum = sumOfProduct / payers.Count();
 
@@ -237,7 +227,7 @@ namespace MethodProcessor
 
             StringBuilder result = new StringBuilder();
 
-            result.Append($"Counting by {_currentShoppingList}\n");
+            result.Append($"Counting by {CurrentShoppingList}\n");
 
             foreach (var payer in payed)
             {
@@ -251,7 +241,7 @@ namespace MethodProcessor
 
         public string GetShoppingLists()
         {
-            var allShoppingLists = _dbProvider.GetAllShoppingListNotDeletedByUser(_currentUser);
+            var allShoppingLists = _dbProvider.GetAllShoppingListNotDeletedByUser(CurrentUser);
 
             if (allShoppingLists.Count == 0)
             {
@@ -282,18 +272,18 @@ namespace MethodProcessor
 
             Payer payer = _dbProvider.GetPayerById(payerId);
 
-            if (_currentShoppingList is null)
+            if (CurrentShoppingList is null)
             {
                 return "Can't find current shopping list";
             }
-               
+
             if (!IsPayerInCurrentShoppingListAndNotDeleted(payer))
             {
                 return "That payer is not in current shopping list or deleted";
             }
-                        
+
             _dbProvider.AddFundsToUser(-count, payer);
-           
+
             return $"Success removed {countAsString} from payer";
         }
 
@@ -323,14 +313,14 @@ namespace MethodProcessor
             {
                 return "Use \"/show (shopping list id)\"";
             }
-            
+
             var currentShoppingList = _dbProvider.GetShoppingListById(idShoppingList);
 
             if (currentShoppingList is null)
             {
                 return $"can't find shopping list with id {idShoppingList}";
-            }    
-            
+            }
+
             if (!IsShoppingListOfCurrentUser(idShoppingList))
             {
                 return $"That list is not yours";
@@ -341,7 +331,7 @@ namespace MethodProcessor
             result.Append(currentShoppingList.ToString() + " " + (currentShoppingList.Current ? "(current)" : "") + "\n");
 
             var allProduct = _dbProvider.GetAllProductNotDeletedByShoppingList(currentShoppingList);
-           
+
             result.Append("Products:\n");
 
             foreach (var prod in allProduct)
@@ -370,26 +360,26 @@ namespace MethodProcessor
                 return "Use \"/add (name of product) (cost of product)\"";
             }
 
-            var currentProduct = _dbProvider.GetProductByMessageId(_currentMessageId);
+            var currentProduct = _dbProvider.GetProductByMessageId(CurrentMessageId);
             _dbProvider.UpdateProduct(currentProduct, name, cost);
 
             return $"Success updated {name} with {cost}";
         }
         private bool IsPayerInCurrentShoppingListAndNotDeleted(Payer payer)
         {
-            return payer.ShoppingList == _currentShoppingList && !payer.IsDeleted;
+            return payer.ShoppingList == CurrentShoppingList && !payer.IsDeleted;
         }
 
         private bool IsProductInCurrentShoppingList(Product currentProduct)
         {
-            return _dbProvider.GetAllProductNotDeletedByShoppingList(_currentShoppingList)
-                            .Where(x => x == currentProduct && x.ShoppingList == _currentShoppingList).Count() == 1;
+            return _dbProvider.GetAllProductNotDeletedByShoppingList(CurrentShoppingList)
+                            .Where(x => x == currentProduct && x.ShoppingList == CurrentShoppingList).Count() == 1;
         }
 
         private bool IsShoppingListOfCurrentUser(int shoppingListId)
         {
-            return _dbProvider.GetAllShoppingListNotDeletedByUser(_currentUser)
-                    .Where(x => x.ID == shoppingListId && x.Owner == _currentUser).Count() == 1;
+            return _dbProvider.GetAllShoppingListNotDeletedByUser(CurrentUser)
+                    .Where(x => x.ID == shoppingListId && x.Owner == CurrentUser).Count() == 1;
         }
         public void Dispose()
         {
