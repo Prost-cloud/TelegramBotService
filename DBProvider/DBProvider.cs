@@ -8,7 +8,7 @@ using System.Text;
 
 namespace TelegramBotService.DBContext
 {
-    public class DbProvider : IDbProvider, IDisposable
+    public class DbProvider : IDbProvider
     {
 
         SqlLiteDBContext _sqlLiteDBContext;
@@ -142,16 +142,9 @@ namespace TelegramBotService.DBContext
             return _sqlLiteDBContext.Products.Where(x => x.ShoppingList == shoppingList && !x.IsDeleted).ToList();
         }
 
-        public void Dispose()
+        public void SaveChanges()
         {
-            try
-            {
                 _sqlLiteDBContext.SaveChanges();
-            }
-            catch (DbUpdateException)
-            {
-                Console.WriteLine("db exception in dispose");
-            }
         }
     }
 }

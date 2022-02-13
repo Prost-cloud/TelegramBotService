@@ -4,34 +4,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CommandParcer
+namespace MessageParcer
 {
     public class Parcer : IParcer
     {
         //private readonly Dictionary<string, string> _commandDefaultReturn;
         private readonly Dictionary<string, int> _commandCountOfArgs;
         public string Message { get; private set; }
-        public bool IsUpdate { get; private set; }
         public string Command { get; private set; }
         public List<string> Args { get; private set; }
 
 
         public Parcer()
         {
-
-            //_commandDefaultReturn = new Dictionary<string, string>
-            //{
-            //    { "/add", "Use /add (name) (cost)" },
-            //    { "/delete", "Use /delete (product ID)" },
-            //    { "/addpayer", "Use /addpayer (name)" },
-            //    { "/deletepayer", "Use /deletepayer (payer ID)" },
-            //    { "/addfunds", "Use /addfunds (payer ID) (count)" },
-            //    { "/removefunds", "Use /removefunds (payer ID) (count)" },
-            //    { "/create", "Use /create (name)" },
-            //    { "/deleteshoppinglist", "Use /deleteshoppinglist (shopping list ID)" },
-            //    { "/select", "Use /select (shopping list ID)" },
-            //    { "/show", "Use /show (shopping list ID)" }
-            //};
 
             _commandCountOfArgs = new Dictionary<string, int>
             {
@@ -51,20 +36,20 @@ namespace CommandParcer
             };
         }
 
-        public bool TryParceCommand(string command)
+        public bool TryParceCommand(string command, bool isUpdate)
         {
             List<string> args = command.Split(' ').ToList();
 
-            if (IsUpdate)
+            if (isUpdate)
             {
-                command = args[0];
+                Command = args[0];
                 args.RemoveAt(0);
 
-                command = command.ToLower();
+                command = Command.ToLower();
 
-                if (command == "/add")
+                if (Command == "/add")
                 {
-                    Args = CreateArgs(command, args);
+                    Args = CreateArgs(args);
 
                     Command = "/addupdate";
                     return true;
@@ -74,9 +59,9 @@ namespace CommandParcer
             Command = args[0];
             args.RemoveAt(0);
 
-            Command = command.ToLower();
+            Command = Command.ToLower();
 
-            Args = CreateArgs(command, args);
+            Args = CreateArgs(args);
 
             if (Args is null)
             {
@@ -94,31 +79,31 @@ namespace CommandParcer
        //    return _commandDefaultReturn[command];
        //}
 
-        private List<string> CreateArgs(string name, List<string> args)
+        private List<string> CreateArgs(List<string> args)
         {
 
-            if (!_commandCountOfArgs.ContainsKey(name))
+            if (!_commandCountOfArgs.ContainsKey(Command))
             {
                 return null;
             }
 
-            if (args.Count == _commandCountOfArgs[name])
+            if (args.Count == _commandCountOfArgs[Command])
             {
                 return args;
             }
-            if (args.Count < _commandCountOfArgs[name])
+            if (args.Count < _commandCountOfArgs[Command])
             {
                 return null;
             }
 
-            if (_commandCountOfArgs[name] == 0)
+            if (_commandCountOfArgs[Command] == 0)
             {
                 return new List<string>();
             }
 
             List<string> newArgs = new List<string>();
 
-            int difference = args.Count() - _commandCountOfArgs[name];
+            int difference = args.Count() - _commandCountOfArgs[Command];
 
             string newName = string.Empty;
 

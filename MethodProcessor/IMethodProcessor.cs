@@ -26,6 +26,7 @@ namespace MethodProcessor
 
         public string GetCountingByPayers();
         public string GetShoppingLists();
-        public void Dispose();
+        public void SetArgumentsByChatIdAndMessageId(long chatId, int messageId);
+        public void SaveChanges();
     }
 }

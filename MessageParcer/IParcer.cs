@@ -1,14 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace CommandParcer
+namespace MessageParcer
 {
     public interface IParcer
     {
-        bool IsUpdate { get; }
         string Message { get; }
         string Command { get;  }
         List<string> Args { get;  }
 
-        bool TryParceCommand(string command);
+        bool TryParceCommand(string command, bool isUpdate);
     }
 }

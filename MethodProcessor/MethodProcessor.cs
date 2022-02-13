@@ -8,16 +8,28 @@ using TelegramBotService.DBContext;
 
 namespace MethodProcessor
 {
-    public class MethodProcessor : IMethodProcessor, IDisposable
+    public class MethodProcessor : IMethodProcessor
     {
         readonly IDbProvider _dbProvider;
-        User CurrentUser { get; set; }
+        Models.User CurrentUser { get; set; }
         int CurrentMessageId { get; set; }
         ShoppingList CurrentShoppingList { get; set; }
 
         public MethodProcessor(IDbProvider dbProvider)
         {
             _dbProvider = dbProvider;
+        }
+
+        public void SetArgumentsByChatIdAndMessageId(long chatId, int messageId)
+        {
+            CurrentMessageId = messageId;
+            CurrentUser = _dbProvider.GetUserByChatId(chatId);
+            CurrentShoppingList = _dbProvider.GetCurrentShoppingListByUser(CurrentUser);
+        }
+
+        public void SaveChanges()
+        {
+            _dbProvider.SaveChanges();
         }
 
         public string AddFunds(string payerIdAsString, string countAsString)
@@ -380,10 +392,6 @@ namespace MethodProcessor
         {
             return _dbProvider.GetAllShoppingListNotDeletedByUser(CurrentUser)
                     .Where(x => x.ID == shoppingListId && x.Owner == CurrentUser).Count() == 1;
-        }
-        public void Dispose()
-        {
-            _dbProvider.Dispose();
         }
     }
 }

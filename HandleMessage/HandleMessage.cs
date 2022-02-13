@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using CommandParcer;
+using MessageParcer;
 using MethodProcessor;
+using MethodProvider;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -18,11 +19,15 @@ namespace HandleMessage
         public bool IsUpdate { get; private set; }
         private readonly IParcer _parser;
         private readonly IMethodProvider _methodProvider;
+        private readonly IMethodProcessor _methodProcessor;
+        private readonly IDefaultCommandReturn _defaultCommandReturn;
 
-        public HandleMessage(IParcer parcer, IMethodProvider methodProvider)
+        public HandleMessage(IParcer parcer, IMethodProvider methodProvider, IMethodProcessor methodProcessor, IDefaultCommandReturn defaultCommandReturn)
         {
             _parser = parcer;
             _methodProvider = methodProvider;
+            _methodProcessor = methodProcessor;
+            _defaultCommandReturn = defaultCommandReturn;
         }
 
         public async Task Invoke(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
@@ -89,10 +94,9 @@ namespace HandleMessage
 
         private void ProcessMessage()
         {
-            if (!_parser.TryParceCommand(Message.Text))
+            if (!_parser.TryParceCommand(Message.Text, IsUpdate))
             {
-                Result = "Add class to get return for command";
-                throw new NotImplementedException();
+                Result = _defaultCommandReturn.GetDefaultReturnByCommandName(Message.Text.Split(" ")[0]);
                 return;
             }
 
@@ -102,8 +106,18 @@ namespace HandleMessage
                 return;
             }
 
+            _methodProcessor.SetArgumentsByChatIdAndMessageId(Message.Chat.Id, Message.MessageId);
 
-            method.DynamicInvoke(_parser.Args);
+            Result = (string)method.DynamicInvoke(_parser.Args.ToArray());
+
+            try
+            {
+                _methodProcessor.SaveChanges();
+            }
+            catch
+            {
+                Result = "Something went wrong, try anoither time later";
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CommandParcer
+namespace MethodProvider
 {
     public interface IMethodProvider
     {

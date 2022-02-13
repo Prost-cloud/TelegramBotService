@@ -3,7 +3,7 @@ using MethodProcessor;
 using System;
 using System.Collections.Generic;
 
-namespace CommandParcer
+namespace MethodProvider
 {
     public class MethodProvider : IMethodProvider
     {
